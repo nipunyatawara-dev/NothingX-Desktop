@@ -7,6 +7,7 @@
 A lightweight menu-bar and tray companion for macOS and Windows.</p>
 
 <p align="center">
+  <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/tag/v1.0.0">Download 1.0</a> ·
   <a href="#get-started">Get started</a> ·
   <a href="#features">Features</a> ·
   <a href="#build-from-source">Build from source</a> ·
@@ -19,8 +20,18 @@ Rebuilt with **Rust and the system webview**, NothingX Desktop keeps the familia
 compact panel while replacing the Electron runtime. Check your battery, change
 noise control and adjust supported earbud settings from the menu bar or taskbar.
 
-**In development.** The first public release is coming after further polish and
-testing. Source builds are available now; there is no published installer yet.
+**Version 1.0 is available as a manual release.** Choose your Mac architecture
+below, or use the Windows x64 installer. Windows runtime testing is still pending.
+
+| Download | Requirements |
+| --- | --- |
+| [macOS · Apple Silicon DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-macos-arm64.dmg) | macOS 13+, M-series Mac |
+| [macOS · Intel DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-macos-intel.dmg) | macOS 13+, Intel Mac; runtime testing pending |
+| [Windows · x64 installer](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-windows-x64-setup.exe) | Windows 10/11 x64; runtime testing pending |
+
+The Mac builds are ad-hoc signed and unnotarized; Windows builds are unsigned.
+The Windows installer installs WebView2 only if missing, which needs internet
+access. All packages are built locally, without GitHub Actions.
 
 ## Features
 
@@ -37,7 +48,7 @@ readings stay unknown rather than showing a misleading zero.
 
 | Platform | Current status |
 | --- | --- |
-| macOS 13+, Apple Silicon | Built and exercised with **CMF Buds 2 Plus** |
+| macOS 13+, Apple Silicon | **CMF Buds 2 Plus** tested, including 2–3 hours of use reported by the owner |
 | macOS 13+, Intel | Included in the universal build; Intel runtime testing pending |
 | Windows 10/11, x64 | Cross-built and compile checked; native UI and Bluetooth testing pending |
 
@@ -47,7 +58,7 @@ verified on hardware. A model profile is not a guarantee of compatibility.
 
 ## Get started
 
-1. [Build the app](#build-from-source). On macOS open `dist/NothingX Desktop.app`. On Windows extract the portable ZIP and keep `WebView2Loader.dll` beside the executable.
+1. Download your package above. On macOS open the DMG and drag **NothingX Desktop** to **Applications**. On Windows run the setup executable. [Building from source](#build-from-source) is also supported.
 2. Pair and connect your headphones in the system's Bluetooth settings. Allow Bluetooth access when macOS asks.
 3. **Left-click the menu-bar or tray icon** to open the panel. Click outside to dismiss it. Use the panel's **power button** to quit. Right-click has no menu.
 
@@ -72,7 +83,7 @@ cd NothingX-Desktop
 
 ### macOS
 
-Install a current Rust toolchain and Xcode Command Line Tools with Swift 6.
+Install a current Rust toolchain, Python 3.11+ and Xcode Command Line Tools with Swift 6.
 
 ```sh
 # Build for your Mac
@@ -90,7 +101,8 @@ notices in `dist/`. macOS builds are ad-hoc signed and are not notarized.
 
 ### Windows
 
-Install Rust's MSVC toolchain, Visual Studio C++ Build Tools and the
+Install Rust's MSVC toolchain, Visual Studio C++ Build Tools, Python 3.11+, NSIS
+(`makensis` on PATH) and the
 [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
 Run this from PowerShell:
 
@@ -98,8 +110,14 @@ Run this from PowerShell:
 powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1
 ```
 
-The script creates a portable ZIP in `dist/`, including `WebView2Loader.dll`.
-Windows builds are unsigned.
+The script creates a portable ZIP and per-user setup executable in `dist/`,
+including `WebView2Loader.dll`. Windows builds are unsigned.
+
+For local release packaging on macOS, install `mingw-w64` and `nsis` with
+Homebrew, add the `aarch64-apple-darwin`, `x86_64-apple-darwin` and
+`x86_64-pc-windows-gnu` Rust targets, then run `bash scripts/build-release.sh`.
+It builds both DMGs and Windows packages, source and SHA-256 checksums.
+Publishing is a separate manual step; no CI or Actions workflow is included.
 
 ## Under the hood
 
@@ -121,6 +139,7 @@ does not claim a measured RAM reduction against the original app.
 cargo test --locked
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
+node scripts/check-ui.cjs
 
 # UI simulation; no Bluetooth helper or device changes
 cargo run -- --simulate "CMF Buds 2 Plus" --open

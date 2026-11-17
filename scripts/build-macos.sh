@@ -40,5 +40,5 @@ fi
 mv "$app" "dist/NothingX Desktop.app"
 app="dist/NothingX Desktop.app"
 ditto -c -k --sequesterRsrc --keepParent "$app" dist/NothingX-Desktop-macos.zip
-shasum -a 256 dist/NothingX-Desktop-macos.zip dist/NothingX-Desktop-source.zip > dist/SHA256SUMS.txt
+shasum -a 256 dist/NothingX-Desktop-macos.zip > dist/SHA256SUMS-macos.txt
 du -sh "$app"

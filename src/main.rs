@@ -35,9 +35,13 @@ pub enum Event {
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
+    if args.iter().any(|s| s == "--version") {
+        println!("NothingX Desktop {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
     if args.iter().any(|s| s == "--help") {
         println!(
-            "NothingX Desktop\n--simulate [model]\n--open\n--status-file PATH\n--quit-after SECONDS"
+            "NothingX Desktop\n--version\n--simulate [model]\n--open\n--status-file PATH\n--quit-after SECONDS"
         );
         return;
     }

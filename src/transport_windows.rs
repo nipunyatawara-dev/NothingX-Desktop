@@ -11,6 +11,7 @@ use std::{
         mpsc::{self, Receiver, Sender},
     },
     thread,
+    time::{Duration, Instant},
 };
 use windows_sys::{
     Win32::{Devices::Bluetooth::*, Networking::WinSock::*},
@@ -245,16 +246,22 @@ fn connected(
 ) {
     let mut output = VecDeque::<u8>::new();
     let mut bytes = [0u8; 4096];
+    let mut shutdown_deadline = None;
     loop {
         if stop.load(Ordering::Acquire) {
-            return;
+            shutdown_deadline.get_or_insert_with(|| Instant::now() + Duration::from_millis(500));
         }
         let handles = [
             wake as *mut core::ffi::c_void,
             event.0 as *mut core::ffi::c_void,
         ];
-        let selected = unsafe { WSAWaitForMultipleEvents(2, handles.as_ptr(), 0, WSA_INFINITE, 0) };
-        if selected == WSA_WAIT_FAILED {
+        let timeout = shutdown_deadline.map_or(WSA_INFINITE, |deadline| {
+            deadline
+                .saturating_duration_since(Instant::now())
+                .as_millis() as u32
+        });
+        let selected = unsafe { WSAWaitForMultipleEvents(2, handles.as_ptr(), 0, timeout, 0) };
+        if selected == WSA_WAIT_FAILED || selected == WSA_WAIT_TIMEOUT {
             return;
         }
         unsafe {
@@ -263,30 +270,32 @@ fn connected(
         while let Ok(frame) = rx.try_recv() {
             output.extend(frame);
         }
-        if stop.load(Ordering::Acquire) {
-            return;
-        }
+        // Flush already queued commands, including Stop Sound, before closing.
+        // The next wait is bounded if the remote device stops accepting writes.
+        let stopping = stop.load(Ordering::Acquire);
         let mut network = WSANETWORKEVENTS::default();
         if unsafe { WSAEnumNetworkEvents(socket.0, event.0, &mut network) } != 0 {
             return;
         }
         // Drain all available bytes; reading re-arms FD_READ.
-        loop {
-            let count = unsafe { recv(socket.0, bytes.as_mut_ptr(), bytes.len() as i32, 0) };
-            if count == 0 {
-                return;
-            }
-            if count < 0 {
-                if unsafe { WSAGetLastError() } == WSAEWOULDBLOCK {
-                    break;
+        if !stopping {
+            loop {
+                let count = unsafe { recv(socket.0, bytes.as_mut_ptr(), bytes.len() as i32, 0) };
+                if count == 0 {
+                    return;
                 }
-                return;
-            }
-            if proxy
-                .send_event(Event::Data(bytes[..count as usize].to_vec()))
-                .is_err()
-            {
-                return;
+                if count < 0 {
+                    if unsafe { WSAGetLastError() } == WSAEWOULDBLOCK {
+                        break;
+                    }
+                    return;
+                }
+                if proxy
+                    .send_event(Event::Data(bytes[..count as usize].to_vec()))
+                    .is_err()
+                {
+                    return;
+                }
             }
         }
         if network.lNetworkEvents & FD_CLOSE as i32 != 0 {
@@ -305,6 +314,9 @@ fn connected(
                 return;
             }
             output.drain(..count as usize);
+        }
+        if stopping && output.is_empty() {
+            return;
         }
     }
 }

@@ -53,10 +53,6 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn reset(&mut self) {
-        self.buffer.clear();
-    }
-
     pub fn push(&mut self, chunk: &[u8]) -> Vec<Frame> {
         let mut frames = Vec::new();
         // Process incrementally: a hostile input chunk cannot grow retained memory.

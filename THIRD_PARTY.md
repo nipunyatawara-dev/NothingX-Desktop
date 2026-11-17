@@ -56,3 +56,14 @@ Cargo.lock pins the exact dependency graph. Primary direct dependencies:
 Tao, tray-icon/muda, fs2, serde/serde_json and windows-sys. Their source license
 notices are included in DEPENDENCY_LICENSES.txt in packaged releases. System
 frameworks are supplied by macOS and Windows.
+
+## Microsoft WebView2
+
+Windows packages include WebView2Loader.dll supplied by the webview2-com-sys
+package. The Windows setup executable also bundles Microsoft's Evergreen
+WebView2 bootstrapper, downloaded directly from Microsoft during packaging.
+These Microsoft components retain their own terms; they are not relicensed
+under this project's AGPL terms. The shared Runtime is installed only if missing
+and is left in place when NothingX Desktop is uninstalled.
+
+Distribution reference: https://learn.microsoft.com/microsoft-edge/webview2/concepts/distribution

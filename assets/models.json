@@ -62,7 +62,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": "audiodo",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -128,7 +129,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": "audiodo",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -194,19 +196,16 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
     "name": "Nothing Ear (open)",
     "capabilities": {
-      "transparency": true,
-      "strengths": [
-        "low",
-        "mid",
-        "high"
-      ],
-      "adaptive": true,
+      "transparency": false,
+      "strengths": [],
+      "adaptive": false,
       "bassSteps": 0,
       "inEar": false,
       "lowLatency": true,
@@ -247,7 +246,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": false
     }
   },
   {
@@ -318,7 +318,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": "audiodo",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -506,7 +507,8 @@
             ]
           }
         ]
-      }
+      },
+      "noiseCancellation": true
     }
   },
   {
@@ -699,7 +701,8 @@
             ]
           }
         ]
-      }
+      },
+      "noiseCancellation": true
     }
   },
   {
@@ -761,7 +764,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -814,7 +818,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -876,7 +881,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": "audiodo",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -923,7 +929,8 @@
       "dualConnection": false,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -990,7 +997,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1052,7 +1060,8 @@
       "dualConnection": true,
       "dualRestarts": true,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1101,7 +1110,8 @@
       "dualConnection": false,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": false
     }
   },
   {
@@ -1160,7 +1170,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1353,7 +1364,8 @@
             ]
           }
         ]
-      }
+      },
+      "noiseCancellation": true
     }
   },
   {
@@ -1406,7 +1418,8 @@
       "dualConnection": true,
       "dualRestarts": false,
       "personalSound": "mimi",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1465,7 +1478,8 @@
       "dualConnection": true,
       "dualRestarts": true,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1518,7 +1532,8 @@
       "dualConnection": false,
       "dualRestarts": false,
       "personalSound": null,
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   },
   {
@@ -1571,7 +1586,8 @@
       "dualConnection": true,
       "dualRestarts": true,
       "personalSound": "mimi",
-      "gestures": null
+      "gestures": null,
+      "noiseCancellation": true
     }
   }
 ]

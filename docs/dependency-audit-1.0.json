@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-11-17T18:45:37.953799+00:00",
+  "source": "https://api.osv.dev/v1/querybatch",
+  "packages_checked": 275,
+  "matches": [
+    {
+      "package": "glib",
+      "version": "0.18.5",
+      "advisories": [
+        {
+          "id": "GHSA-wrw7-89jp-8q8g",
+          "modified": "2025-10-28T06:29:26.473225Z"
+        },
+        {
+          "id": "RUSTSEC-2024-0429",
+          "modified": "2025-10-28T06:29:26.473225Z"
+        }
+      ]
+    },
+    {
+      "package": "proc-macro-error",
+      "version": "1.0.4",
+      "advisories": [
+        {
+          "id": "RUSTSEC-2024-0370",
+          "modified": "2026-06-07T20:00:03.923932Z"
+        }
+      ]
+    }
+  ],
+  "shipping_targets": {
+    "aarch64-apple-darwin": {
+      "advisory_matches": []
+    },
+    "x86_64-apple-darwin": {
+      "advisory_matches": []
+    },
+    "x86_64-pc-windows-msvc": {
+      "advisory_matches": []
+    },
+    "x86_64-pc-windows-gnu": {
+      "advisory_matches": []
+    }
+  },
+  "notes": "Lockfile matches are Linux-only GTK dependencies, absent from the selected macOS and Windows cargo tree outputs. No Linux build is distributed.",
+  "references": [
+    "https://rustsec.org/advisories/RUSTSEC-2024-0429.html",
+    "https://rustsec.org/advisories/RUSTSEC-2024-0370.html"
+  ]
+}

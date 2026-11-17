@@ -1,6 +1,7 @@
 //! Compatibility adapter for the original, unmodified Nothing X Mac renderer.
 use crate::device::{Device, Key, Value};
 use serde_json::{Value as Json, json};
+use std::sync::OnceLock;
 
 fn byte(d: &Device, key: Key) -> Option<u8> {
     match d.value(key) {
@@ -24,8 +25,11 @@ pub fn mac(address: [u8; 6]) -> String {
 pub fn snapshot(d: &Device) -> Json {
     let mut caps = match &d.caps {
         Some(c) => {
-            let data: Json = serde_json::from_str(include_str!("../assets/models.json"))
-                .expect("embedded profiles");
+            static PROFILES: OnceLock<Json> = OnceLock::new();
+            let data = PROFILES.get_or_init(|| {
+                serde_json::from_str(include_str!("../assets/models.json"))
+                    .expect("embedded profiles")
+            });
             let name = d.name.to_lowercase();
             let mut caps = data
                 .as_array()
@@ -46,11 +50,12 @@ pub fn snapshot(d: &Device) -> Json {
             caps
         }
         None => {
-            json!({"transparency":false,"strengths":[],"adaptive":false,"bassSteps":0,"bassLevels":[],"inEar":false,"lowLatency":false,"ring":"buds","spatialModes":[],"dualConnection":false,"dualRestarts":false,"personalSound":null,"gestures":null,"eq":{"style":"eq","presets":[],"customId":null,"trebleHz":3400}})
+            json!({"noiseCancellation":false,"transparency":false,"strengths":[],"adaptive":false,"bassSteps":0,"bassLevels":[],"inEar":false,"lowLatency":false,"ring":"buds","spatialModes":[],"dualConnection":false,"dualRestarts":false,"personalSound":null,"gestures":null,"eq":{"style":"eq","presets":[],"customId":null,"trebleHz":3400}})
         }
     };
     if d.caps.is_none() {
         caps["gestures"] = Json::Null;
+        caps["ring"] = json!("none");
     }
     let battery = d
         .battery
@@ -132,7 +137,7 @@ pub fn snapshot(d: &Device) -> Json {
             }
         }
     }
-    json!({"connected":d.connected,"name":if d.connected{Some(d.name.as_str())}else{None},"battery":battery,
+    json!({"connected":d.connected,"name":if d.connected{Some(d.name.as_str())}else{None},"battery":battery,"computerLabel":"This computer",
         "noiseMode":noise,"ancStrength":strength,"noisePending":d.is_pending(Key::Noise),"bass":bass,"bassPending":d.is_pending(Key::Bass),
         "quick":{"inEar":flag(d,Key::InEar),"lowLatency":flag(d,Key::LowLatency),"personalSound":flag(d,Key::Personal),"spatial":spatial,
             "pending":{"inEar":d.is_pending(Key::InEar),"lowLatency":d.is_pending(Key::LowLatency),"personalSound":d.is_pending(Key::Personal),"spatial":d.is_pending(Key::Spatial)},
@@ -173,7 +178,10 @@ pub fn command(d: &Device, name: &str, args: &[Json]) -> Option<crate::device::A
                 _ => (0, 2),
             };
             let steps = d.caps.as_ref()?.bass_steps;
-            let level = first.get("level").and_then(Json::as_u64).map(|n| n as u8);
+            let level = match first.get("level") {
+                Some(value) => Some(u8::try_from(value.as_u64()?).ok()?),
+                None => None,
+            };
             let on = first
                 .get("enabled")
                 .and_then(Json::as_bool)

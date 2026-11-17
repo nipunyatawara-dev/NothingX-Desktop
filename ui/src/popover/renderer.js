@@ -31,12 +31,13 @@ function renderHeader(state) {
 }
 
 function renderBattery(battery) {
-  for (const part of ['left', 'right', 'case']) {
+  const stereoOnly = Boolean(battery.stereo && !battery.left && !battery.right);
+  for (const part of ['left', 'right', 'case', 'stereo']) {
     const el = $(`.bud[data-part="${part}"]`);
     const info = battery[part];
     // No case data (e.g. case closed or out of range): drop the column so the
     // buds sit centred. Missing buds stay visible but dimmed.
-    if (part === 'case') el.hidden = !info;
+    el.hidden = part === 'stereo' ? !stereoOnly : part === 'case' ? !info : stereoOnly;
     el.classList.toggle('unavailable', !info);
     el.classList.toggle('charging', Boolean(info?.charging));
     el.classList.toggle('low', Boolean(info && !info.charging && info.level <= LOW_BATTERY));
@@ -52,6 +53,11 @@ function renderNoiseMode(mode) {
 }
 
 function renderCapabilities(capabilities) {
+  const hasAnc = capabilities.noiseCancellation;
+  const hasNoise = hasAnc || capabilities.transparency;
+  $('#noise-section').hidden = !hasNoise;
+  $('#noise-separator').hidden = !hasNoise;
+  $('.option[data-mode="anc"]').hidden = !hasAnc;
   $('.option[data-mode="transparency"]').hidden = !capabilities.transparency;
 }
 

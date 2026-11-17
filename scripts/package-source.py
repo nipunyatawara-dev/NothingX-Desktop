@@ -1,6 +1,5 @@
 """Create reproducible source and dependency-notice artifacts, without build trees."""
 from pathlib import Path
-import os
 import subprocess
 import json
 import zipfile
@@ -9,6 +8,7 @@ root = Path(__file__).resolve().parent.parent
 destination = root / "dist"
 destination.mkdir(exist_ok=True)
 metadata = json.loads(subprocess.check_output(["cargo", "metadata", "--locked", "--format-version", "1"], cwd=root))
+version = next(p["version"] for p in metadata["packages"] if p["name"] == "nothingx-desktop")
 notices = []
 for package in sorted(metadata["packages"], key=lambda p: (p["name"], p["version"])):
     if package["source"] is None:
@@ -19,10 +19,8 @@ for package in sorted(metadata["packages"], key=lambda p: (p["name"], p["version
     for file in sorted(files):
         notices.append(f"\n{file.name}\n{file.read_text(errors='replace')}\n")
 (destination / "DEPENDENCY_LICENSES.txt").write_text("".join(notices))
-with zipfile.ZipFile(destination / "NothingX-Desktop-source.zip", "w", zipfile.ZIP_DEFLATED) as archive:
-    for base, directories, files in os.walk(root):
-        directories[:] = sorted(d for d in directories if d not in {".git", "target", "build", "dist", ".DS_Store"})
-        for name in sorted(files):
-            file = Path(base) / name
-            if name != ".DS_Store":
-                archive.write(file, Path("NothingX-desktop") / file.relative_to(root))
+files = subprocess.check_output(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=root).decode().split("\0")
+with zipfile.ZipFile(destination / f"NothingX-Desktop-{version}-source.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+    for name in sorted(set(files)):
+        if name and (root / name).is_file():
+            archive.write(root / name, Path(f"NothingX-Desktop-{version}") / name)

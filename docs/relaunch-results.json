@@ -1,19 +1,19 @@
 [
   {
     "cycle": 1,
-    "ready_seconds": 7.61,
+    "ready_seconds": 1.04,
     "exit_code": 0,
     "log": "Connected to CMF Buds 2 Plus"
   },
   {
     "cycle": 2,
-    "ready_seconds": 7.52,
+    "ready_seconds": 0.53,
     "exit_code": 0,
     "log": "Connected to CMF Buds 2 Plus"
   },
   {
     "cycle": 3,
-    "ready_seconds": 7.53,
+    "ready_seconds": 0.63,
     "exit_code": 0,
     "log": "Connected to CMF Buds 2 Plus"
   }

@@ -192,9 +192,6 @@ impl Device {
     pub fn is_pending(&self, key: Key) -> bool {
         self.pending.contains_key(&key)
     }
-    pub fn pending_keys(&self) -> Vec<Key> {
-        self.pending.keys().copied().collect()
-    }
     pub fn value(&self, key: Key) -> Option<&Value> {
         self.values.get(&key)
     }
@@ -245,7 +242,7 @@ impl Device {
     fn spec(&self, key: Key) -> Option<(u16, u16, bool)> {
         let c = self.caps.as_ref()?;
         let spec = match key {
-            Key::Noise => (0xc01e, 0xf00f, true),
+            Key::Noise => (0xc01e, 0xf00f, c.noise_cancellation || c.transparency),
             Key::Bass => (0xc04e, 0xf051, c.bass_steps > 0),
             Key::InEar => (0xc00e, 0xf004, c.in_ear),
             Key::LowLatency => (0xc041, 0xf040, c.low_latency),
@@ -283,7 +280,7 @@ impl Device {
                 let valid = match code {
                     5 => true,
                     7 => c.transparency,
-                    1 => !c.strengths.is_empty(),
+                    1 => c.noise_cancellation,
                     2 => c.strengths.iter().any(|s| s == "mid"),
                     3 => c.strengths.iter().any(|s| s == "low"),
                     4 => c.adaptive,
@@ -334,7 +331,12 @@ impl Device {
         }
         match action {
             Action::Set(key, target) => {
-                if self.is_pending(key) || self.value(key) == Some(&target) {
+                // EQ sliders can emit many targets before the first readback.
+                // Keep the latest target and at most one unsent EQ write.
+                // A settled value must still be sent if an older write is pending.
+                if (self.is_pending(key) && key != Key::CustomEq)
+                    || (!self.is_pending(key) && self.value(key) == Some(&target))
+                {
                     return;
                 }
                 let Some((_, set, _)) = self.spec(key) else {
@@ -346,6 +348,9 @@ impl Device {
                 if self.simulation {
                     self.values.insert(key, target);
                     return;
+                }
+                if key == Key::CustomEq {
+                    self.queue.retain(|(command, _)| *command != set);
                 }
                 self.enqueue(set, payload);
                 self.pending.insert(
@@ -778,5 +783,47 @@ mod tests {
         d.action(Action::DualConnect([6, 5, 4, 3, 2, 1], true), now);
         assert!(d.devices[1].connected);
         assert!(decode_dual(&[0, 0, 1, 0, 1]).is_none());
+    }
+    #[test]
+    fn rapid_eq_changes_keep_the_final_value_including_return_to_initial() {
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
+        d.queue.clear();
+        report(&mut d, 0x4044, &encode_eq([0, 0, 0], 3400));
+        let now = Instant::now();
+        d.action(Action::Set(Key::CustomEq, Value::Eq([1, 0, 0])), now);
+        assert_eq!(d.tick(now).len(), 1); // First write is already on the wire.
+        for bass in [2, 3, 4, 5, 6, 0] {
+            d.action(Action::Set(Key::CustomEq, Value::Eq([bass, 0, 0])), now);
+        }
+        assert_eq!(d.queue.len(), 1);
+        report(&mut d, 0x4044, &encode_eq([1, 0, 0], 3400));
+        assert!(d.is_pending(Key::CustomEq));
+        let frames = Parser::default().push(&d.tick(now + Duration::from_millis(151))[0]);
+        assert_eq!(frames[0].command, 0xf041);
+        assert_eq!(decode_eq(&frames[0].payload), Some([0, 0, 0]));
+        report(&mut d, 0x4044, &encode_eq([0, 0, 0], 3400));
+        assert!(!d.is_pending(Key::CustomEq));
+    }
+    #[test]
+    fn fixed_anc_models_accept_anc_but_open_ear_model_does_not() {
+        for (name, supported) in [
+            ("CMF Buds 2a", true),
+            ("CMF Buds", true),
+            ("Nothing Ear (open)", false),
+        ] {
+            let mut d = Device::default();
+            d.on_connected(name.into(), "test".into());
+            d.queue.clear();
+            d.action(Action::Set(Key::Noise, Value::Byte(1)), Instant::now());
+            assert_eq!(d.is_pending(Key::Noise), supported, "{name}");
+            assert_eq!(
+                d.queue
+                    .front()
+                    .map(|(command, payload)| (*command, payload.as_slice())),
+                supported.then_some((0xf00f, [1, 1, 0].as_slice())),
+                "{name}"
+            );
+        }
     }
 }

@@ -12,7 +12,7 @@ with tempfile.TemporaryDirectory(prefix="nothingx-relaunch-") as directory:
     for cycle in range(1, 4):
         status = Path(directory) / f"state-{cycle}.json"
         start = time.monotonic()
-        process = subprocess.Popen([str(binary), "--status-file", str(status), "--quit-after", "8"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen([str(binary), "--status-file", str(status), "--quit-after", "15"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
         ready = None
         snapshot = None
         while process.poll() is None:

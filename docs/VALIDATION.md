@@ -1,4 +1,4 @@
-# Validation — 17 November 2026
+# Validation — version 1.0, 18 November 2026
 
 ## Scope
 
@@ -16,10 +16,14 @@ left/right battery, noise mode, bass and other device state. Battery was first
 Unknown case readings stay absent instead of becoming zero. Live verification
 used status queries and did not change ANC/EQ or play a Find sound.
 
-Three full application quit/relaunch cycles received real battery readings in
-7.61, 7.52 and 7.53 seconds without disconnecting/reconnecting Bluetooth audio.
-Exact results are in relaunch-results.json. Startup still takes about eight
-seconds on this host; a busy phone/other controller can delay it further.
+The owner reports 2–3 hours of successful use with CMF Buds 2 Plus. This is
+user-reported runtime coverage, distinct from the automated checks below.
+
+Three version 1.0 quit/relaunch cycles received real battery readings in
+1.04, 0.53 and 0.63 seconds without disconnecting/reconnecting Bluetooth audio.
+Exact results are in relaunch-results.json. Earlier cold/control-channel checks
+on 17 November took 7.61, 7.52 and 7.53 seconds. Startup latency depends on the
+current Bluetooth session; these are not comparable performance benchmarks.
 
 The macOS bridge uses asynchronous RFCOMM opening, handles a completion callback
 that may arrive during open, keeps its run loop alive to acknowledge close,
@@ -59,11 +63,11 @@ click: right-click has no context menu. Quit is the panel’s power button.
 
 ## Footprint
 
-Universal macOS bundle after the application-icon update: approximately 6.2 MiB
+Universal macOS 1.0 bundle: approximately 6.3 MiB
 including helper, application artwork and dependency notices. Rebuilding may
 slightly change sizes.
 
-A connected, visible idle snapshot measured about **77 MiB summed physical
+A pre-1.0 connected, visible idle snapshot measured about **77 MiB summed physical
 footprint** across all five relevant processes: application 26.4 MiB, WebKit
 GPU 12.6 MiB, WebContent 27.7 MiB, Networking about 6.2 MiB and Bluetooth helper
 about 3.6 MiB. Each sampled 0.0% CPU at that instant. Raw vmmap readings are in
@@ -77,12 +81,35 @@ webview preserves the required UI and has a real process cost.
 
 ## Automated checks and remaining limits
 
-16 Rust tests pass, including independent upstream wire vectors, CRC reference
+19 Rust tests pass, including independent upstream wire vectors, CRC reference
 values, fragmentation/corruption, battery decoding, confirmed writes/timeouts,
 disconnect cleanup, EQ encoding, ring auto-stop and dual-device protection.
 Formatting and Clippy with warnings denied pass for macOS and Windows MSVC;
 Swift 6 and release linking pass. The packaged app passes strict codesign
-verification.
+verification. Additional regression cases cover rapid custom-EQ input and ANC
+on models that have no adjustable intensity. Node-based UI checks cover stereo
+headphone battery reports, ordinary earbuds, unknown readings and noise controls.
+
+Separate arm64 and x86_64 DMGs are built locally. Each image is checksummed,
+mounted read-only, and checked for the correct single architecture in both
+executables, version 1.0 metadata, an Applications link and strict app signature
+verification after packaging. Extension-hiding Finder metadata was removed
+because it invalidated strict signature checks on the packaged app.
+
+The Windows x64 NSIS installer is built locally, extracted with 7-Zip and its
+app/loader payloads inspected for x64 architecture and version metadata. The
+app imports only Windows system libraries and the included WebView2 loader.
+Setup includes Microsoft's Evergreen bootstrapper and checks for an existing
+Runtime before running it. Installing/uninstalling on Windows is not tested here.
+
+An OSV snapshot queried all 275 registry packages in Cargo.lock. It returned
+advisories for Linux-only glib and proc-macro-error dependencies; neither is in
+the selected macOS or Windows dependency graphs. No matches were returned for
+the shipping graphs at the time of the query. See dependency-audit-1.0.json.
+This is a database snapshot, not a guarantee that dependencies have no defects.
+
+The repository contains no workflow files. GitHub Actions is disabled, and the
+repository had zero Actions runs when preparing this manual release.
 
 Actual setting writes, all model/firmware combinations, Find audio behavior,
 sleep/wake and native Windows Bluetooth remain hardware validation work.

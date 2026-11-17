@@ -79,6 +79,7 @@ window.createQuickSettings = function createQuickSettings({ api, views }) {
     tiles.inEar.hidden = !caps.inEar;
     tiles.lowLatency.hidden = !caps.lowLatency;
     tiles.personalSound.hidden = !caps.personalSound;
+    tiles.find.hidden = caps.ring === 'none';
 
     renderToggle(tiles.inEar, quick.inEar, quick.pending.inEar);
     renderToggle(tiles.lowLatency, quick.lowLatency, quick.pending.lowLatency);

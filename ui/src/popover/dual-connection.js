@@ -45,7 +45,7 @@ window.createDualConnectionTile = function createDualConnectionTile({ api, symbo
 
   function statusText(device, busy) {
     if (busy) return device.isConnected ? 'Disconnecting…' : 'Connecting…';
-    if (device.isSelf) return 'This Mac · Connected';
+    if (device.isSelf) return `${state.computerLabel} · Connected`;
     return device.isConnected ? 'Connected' : 'Not connected';
   }
 
@@ -83,7 +83,7 @@ window.createDualConnectionTile = function createDualConnectionTile({ api, symbo
         text.className = 'qs-text';
         const name = document.createElement('span');
         name.className = 'qs-name';
-        name.textContent = device.isSelf ? (device.name || 'This Mac') : (device.name || 'Unknown device');
+        name.textContent = device.isSelf ? (device.name || state.computerLabel) : (device.name || 'Unknown device');
         const sub = document.createElement('span');
         sub.className = 'qs-state';
         sub.textContent = statusText(device, busy);

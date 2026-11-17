@@ -10,6 +10,8 @@ fn main() {
             resource
                 .set_icon("assets/app-icon.ico")
                 .set("ProductName", "NothingX Desktop")
+                .set("ProductVersion", env!("CARGO_PKG_VERSION"))
+                .set("FileVersion", env!("CARGO_PKG_VERSION"))
                 .set(
                     "FileDescription",
                     "NothingX Desktop — Nothing and CMF controls",
@@ -17,13 +19,15 @@ fn main() {
                 .set("OriginalFilename", "nothingx-desktop.exe");
             if !host.contains("windows") {
                 resource
-                    .set_toolkit_path("/opt/homebrew/bin")
+                    .set_toolkit_path(".")
                     .set_windres_path("x86_64-w64-mingw32-windres");
             }
             resource.compile().expect("Windows icon resource");
         }
     }
     println!("cargo:rerun-if-changed=ui");
+    println!("cargo:rerun-if-changed=assets/app-icon.ico");
+    println!("cargo:rerun-if-changed=Cargo.toml");
     let mut files = Vec::new();
     fn visit(path: PathBuf, files: &mut Vec<PathBuf>) {
         for item in fs::read_dir(path).unwrap() {
@@ -51,6 +55,7 @@ fn main() {
             Some("css") => "text/css; charset=utf-8",
             Some("js") => "application/javascript",
             Some("svg") => "image/svg+xml",
+            Some("png") => "image/png",
             _ => "application/octet-stream",
         };
         code += &format!(
