@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>NothingX Desktop</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="panel" class="panel">
+      <!-- Main view: battery, noise control, bass -->
+      <div class="view" id="view-main">
+      <header class="header">
+        <span class="device-badge"><i class="logo" aria-hidden="true"></i></span>
+        <div class="header-text">
+          <div class="title" id="device-name">No Earbuds</div>
+          <div class="subtitle" id="device-status">Not connected</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="equalizer" title="Equalizer" aria-label="Equalizer">
+            <i class="sym" data-sym="equalizer"></i>
+          </button>
+          <button class="icon-btn" id="settings" title="Quick Settings" aria-label="Quick Settings">
+            <i class="sym" data-sym="settings"></i>
+          </button>
+          <button class="icon-btn" id="quit" title="Quit NothingX Desktop" aria-label="Quit NothingX Desktop">
+            <i class="sym" data-sym="power"></i>
+          </button>
+        </div>
+      </header>
+
+      <p class="empty" id="empty-message">
+        Connect your Nothing or CMF earbuds in Bluetooth settings.
+      </p>
+
+      <div class="connected-only">
+      <section class="battery" aria-label="Battery">
+        <div class="bud" data-part="left">
+          <i class="sym bud-icon" data-sym="budLeft"></i>
+          <div class="bud-label">Left</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+        <div class="bud" data-part="right">
+          <i class="sym bud-icon" data-sym="budRight"></i>
+          <div class="bud-label">Right</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+        <div class="bud" data-part="case">
+          <i class="sym bud-icon" data-sym="case"></i>
+          <div class="bud-label">Case</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+      </section>
+
+      <hr />
+
+      <section class="section" id="noise-section" aria-label="Noise Control">
+        <div class="section-title">Noise Control</div>
+        <div class="options" role="radiogroup" id="noise-options">
+          <button class="row option" role="radio" data-mode="anc">
+            <span class="option-icon"><i class="sym" data-sym="anc"></i></span>
+            <span class="row-label">Noise Cancellation</span>
+          </button>
+          <button class="row option" role="radio" data-mode="transparency">
+            <span class="option-icon"><i class="sym" data-sym="transparency"></i></span>
+            <span class="row-label">Transparency</span>
+          </button>
+          <button class="row option" role="radio" data-mode="off">
+            <span class="option-icon"><i class="sym" data-sym="off"></i></span>
+            <span class="row-label">Off</span>
+          </button>
+        </div>
+
+        <div class="strength" id="strength" hidden>
+          <div class="section-title">Intensity</div>
+          <div class="segmented" id="strength-segments" role="radiogroup" aria-label="Noise cancellation intensity"></div>
+        </div>
+      </section>
+
+      <hr id="bass-separator" hidden />
+
+      <section class="section" id="bass-section" aria-label="Bass Enhance" hidden>
+        <div class="section-title">Bass Enhance</div>
+        <div class="bass-row">
+          <button class="bass-toggle" id="bass-toggle" role="switch" aria-checked="false" aria-label="Bass Enhance">
+            <i class="sym" data-sym="bassToggle"></i>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+          <div class="bass-track" id="bass-track" role="slider" tabindex="0" aria-label="Bass level">
+            <div class="bass-fill" id="bass-fill"></div>
+            <div class="bass-slots" id="bass-slots"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <footer>
+        <span class="made-by" id="app-name">NothingX Desktop</span>
+      </footer>
+      </div>
+
+      <!-- Quick Settings view, opened from the gear -->
+      <div class="view" id="view-settings" hidden>
+        <header class="qs-header">
+          <button class="icon-btn" id="qs-back" title="Back" aria-label="Back">
+            <i class="sym" data-sym="back"></i>
+          </button>
+          <div class="title">Quick Settings</div>
+        </header>
+
+        <div class="qs-tiles" id="qs-tiles">
+          <button class="qs-tile" id="qs-in-ear" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsInEar"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">In-Ear Detection</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-latency" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsLatency"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Low Latency</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-personal-sound" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsPersonalSound"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Personal Sound</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-spatial" aria-expanded="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsSpatial"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Spatial Audio</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-dual" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsDual"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Dual Connection</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-find" aria-expanded="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsFind"></i></span>
+            <span class="qs-text"><span class="qs-name">Find Buds</span><span class="qs-state">Play sound</span></span>
+          </button>
+        </div>
+
+        <!-- Find my earbuds: per-bud buttons (earbuds) -->
+        <!-- Spatial audio modes, for models with more than On/Off -->
+        <div class="qs-list" id="qs-spatial-list" role="radiogroup" aria-label="Spatial audio mode" hidden></div>
+
+        <!-- Dual connection: remembered devices, Bluetooth-menu style rows -->
+        <div class="dual" id="qs-dual-panel" hidden>
+          <div class="dual-head">
+            <span>Devices</span>
+            <span id="qs-dual-count"></span>
+          </div>
+          <div class="dual-list" id="qs-dual-list"></div>
+          <p class="qs-note" id="qs-dual-note" hidden></p>
+        </div>
+
+        <div class="qs-find" id="qs-find-panel" hidden>
+          <p class="qs-note">The sound is loud. Take the earbuds out first.</p>
+          <div class="qs-find-buttons">
+            <button class="qs-find-btn" data-side="left">Left</button>
+            <button class="qs-find-btn" data-side="right">Right</button>
+          </div>
+        </div>
+
+        <div class="qs-footer">
+          <span>Firmware</span>
+          <span id="qs-firmware">—</span>
+        </div>
+      </div>
+
+      <!-- Controls view (gestures), opened by clicking the left or right bud in the battery row -->
+      <div class="view" id="view-controls" hidden>
+        <header class="qs-header">
+          <button class="icon-btn" id="controls-back" title="Back" aria-label="Back">
+            <i class="sym" data-sym="back"></i>
+          </button>
+          <div class="title">Controls</div>
+        </header>
+
+        <div class="bud-picker" role="radiogroup" aria-label="Earbud">
+          <button class="bud-card" data-side="left" role="radio">
+            <i class="sym bud-card-icon" data-sym="budLeft"></i>
+            <span>Left</span>
+          </button>
+          <button class="bud-card" data-side="right" role="radio">
+            <i class="sym bud-card-icon" data-sym="budRight"></i>
+            <span>Right</span>
+          </button>
+        </div>
+
+        <div class="group-title" id="controls-side-title">Left Earbud</div>
+        <div class="group" id="controls-gestures"></div>
+
+        <div id="controls-noise" hidden>
+          <div class="group-title">Noise Control</div>
+          <div class="group" id="controls-noise-modes"></div>
+          <p class="group-footer">Tap and hold switches between these. Choose at least two.</p>
+        </div>
+      </div>
+
+      <!-- Equalizer view, opened from the equalizer button -->
+      <div class="view" id="view-eq" hidden>
+        <header class="qs-header">
+          <button class="icon-btn" id="eq-back" title="Back" aria-label="Back">
+            <i class="sym" data-sym="back"></i>
+          </button>
+          <div class="title">Equalizer</div>
+        </header>
+
+        <div class="qs-tiles" id="eq-tiles" role="radiogroup" aria-label="Equalizer preset"></div>
+
+        <!-- Custom: live curve over three band sliders -->
+        <div class="eq-custom" id="eq-custom" hidden>
+          <svg class="eq-curve" viewBox="0 0 260 64" preserveAspectRatio="none" aria-hidden="true">
+            <line class="eq-zero" x1="0" y1="32" x2="260" y2="32" />
+            <path class="eq-area" id="eq-area" />
+            <path class="eq-line" id="eq-line" />
+          </svg>
+          <div class="eq-sliders">
+            <label class="eq-row">
+              <span>Bass</span>
+              <input type="range" min="-6" max="6" step="1" value="0" data-band="bass" aria-label="Bass" />
+              <span class="eq-value" data-value-for="bass">0 dB</span>
+            </label>
+            <label class="eq-row">
+              <span>Mid</span>
+              <input type="range" min="-6" max="6" step="1" value="0" data-band="mid" aria-label="Mid" />
+              <span class="eq-value" data-value-for="mid">0 dB</span>
+            </label>
+            <label class="eq-row">
+              <span>Treble</span>
+              <input type="range" min="-6" max="6" step="1" value="0" data-band="treble" aria-label="Treble" />
+              <span class="eq-value" data-value-for="treble">0 dB</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="views.js"></script>
+    <script src="switch-lock.js"></script>
+    <script src="segmented-control.js"></script>
+    <script src="strength-control.js"></script>
+    <script src="bass-control.js"></script>
+    <script src="quick-settings.js"></script>
+    <script src="spatial-audio.js"></script>
+    <script src="dual-connection.js"></script>
+    <script src="controls.js"></script>
+    <script src="equalizer.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1577 @@
+[
+  {
+    "name": "Nothing Headphone (1) Pro",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "headphone",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3500
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "headTracked",
+          "label": "Head Tracked"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "audiodo",
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing Headphone (1)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "headphone",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3500
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "headTracked",
+          "label": "Head Tracked"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "audiodo",
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing Headphone (a)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 3,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "headphone",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3500
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "concert",
+          "label": "Concert"
+        },
+        {
+          "key": "theatre",
+          "label": "Theatre"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing Ear (open)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 0,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Headphone Pro",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 0,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "headphone",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 3500
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "concert",
+          "label": "Concert"
+        },
+        {
+          "key": "theatre",
+          "label": "Theatre"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "audiodo",
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Buds 2 Plus",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 6900
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "audiodo",
+      "gestures": {
+        "sides": {
+          "left": 2,
+          "right": 3
+        },
+        "noiseCycles": {
+          "10": {
+            "anc": true,
+            "transparency": true,
+            "off": true
+          },
+          "20": {
+            "anc": false,
+            "transparency": true,
+            "off": true
+          },
+          "21": {
+            "anc": true,
+            "transparency": false,
+            "off": true
+          },
+          "22": {
+            "anc": true,
+            "transparency": true,
+            "off": false
+          }
+        },
+        "slots": [
+          {
+            "key": "doubleTap",
+            "label": "Double Tap",
+            "type": 2,
+            "actions": [
+              {
+                "value": 2,
+                "label": "Play/Pause"
+              },
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tripleTap",
+            "label": "Triple Tap",
+            "type": 3,
+            "actions": [
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tapHold",
+            "label": "Tap and Hold",
+            "type": 7,
+            "actions": [
+              {
+                "value": "noise",
+                "label": "Noise Control"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "doubleTapHold",
+            "label": "Double Tap and Hold",
+            "type": 9,
+            "actions": [
+              {
+                "value": 18,
+                "label": "Volume Up"
+              },
+              {
+                "value": 19,
+                "label": "Volume Down"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "CMF Buds Pro 2",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 0,
+            "key": "dirac",
+            "label": "Dirac Opteo"
+          },
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 6900
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": true,
+      "personalSound": null,
+      "gestures": {
+        "sides": {
+          "left": 2,
+          "right": 3
+        },
+        "noiseCycles": {
+          "10": {
+            "anc": true,
+            "transparency": true,
+            "off": true
+          },
+          "20": {
+            "anc": false,
+            "transparency": true,
+            "off": true
+          },
+          "21": {
+            "anc": true,
+            "transparency": false,
+            "off": true
+          },
+          "22": {
+            "anc": true,
+            "transparency": true,
+            "off": false
+          }
+        },
+        "slots": [
+          {
+            "key": "doubleTap",
+            "label": "Double Tap",
+            "type": 2,
+            "actions": [
+              {
+                "value": 2,
+                "label": "Play/Pause"
+              },
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tripleTap",
+            "label": "Triple Tap",
+            "type": 3,
+            "actions": [
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tapHold",
+            "label": "Tap and Hold",
+            "type": 7,
+            "actions": [
+              {
+                "value": "noise",
+                "label": "Noise Control"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "doubleTapHold",
+            "label": "Double Tap and Hold",
+            "type": 9,
+            "actions": [
+              {
+                "value": 18,
+                "label": "Volume Up"
+              },
+              {
+                "value": 19,
+                "label": "Volume Down"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Nothing Ear (3a)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing Ear (a)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing Ear (3)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "audiodo",
+      "gestures": null
+    }
+  },
+  {
+    "name": "Nothing ear (1)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "high"
+      ],
+      "adaptive": false,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "single",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          }
+        ],
+        "customId": null,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": false,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Clip Pro",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 3,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 3400
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Neckband Pro",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "headphone",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 6900
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": true,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Ear (Stick)",
+    "capabilities": {
+      "transparency": false,
+      "strengths": [],
+      "adaptive": false,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3500
+      },
+      "spatialModes": [],
+      "dualConnection": false,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Buds 2a",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [],
+      "adaptive": false,
+      "bassSteps": 5,
+      "inEar": false,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 7,
+            "key": "dirac",
+            "label": "Dirac Opteo"
+          },
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 6900
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Buds 2",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 0,
+            "key": "dirac",
+            "label": "Dirac Opteo"
+          },
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 6900
+      },
+      "spatialModes": [
+        {
+          "key": "off",
+          "label": "Off"
+        },
+        {
+          "key": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": {
+        "sides": {
+          "left": 2,
+          "right": 3
+        },
+        "noiseCycles": {
+          "10": {
+            "anc": true,
+            "transparency": true,
+            "off": true
+          },
+          "20": {
+            "anc": false,
+            "transparency": true,
+            "off": true
+          },
+          "21": {
+            "anc": true,
+            "transparency": false,
+            "off": true
+          },
+          "22": {
+            "anc": true,
+            "transparency": true,
+            "off": false
+          }
+        },
+        "slots": [
+          {
+            "key": "doubleTap",
+            "label": "Double Tap",
+            "type": 2,
+            "actions": [
+              {
+                "value": 2,
+                "label": "Play/Pause"
+              },
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tripleTap",
+            "label": "Triple Tap",
+            "type": 3,
+            "actions": [
+              {
+                "value": 8,
+                "label": "Skip Back"
+              },
+              {
+                "value": 9,
+                "label": "Skip Forward"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "tapHold",
+            "label": "Tap and Hold",
+            "type": 7,
+            "actions": [
+              {
+                "value": "noise",
+                "label": "Noise Control"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          },
+          {
+            "key": "doubleTapHold",
+            "label": "Double Tap and Hold",
+            "type": 9,
+            "actions": [
+              {
+                "value": 18,
+                "label": "Volume Up"
+              },
+              {
+                "value": 19,
+                "label": "Volume Down"
+              },
+              {
+                "value": 11,
+                "label": "Voice Assistant"
+              },
+              {
+                "value": 1,
+                "label": "Off"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Nothing Ear",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": false,
+      "personalSound": "mimi",
+      "gestures": null
+    }
+  },
+  {
+    "name": "CMF Buds",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [],
+      "adaptive": false,
+      "bassSteps": 5,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "listening",
+        "presets": [
+          {
+            "id": 0,
+            "key": "dirac",
+            "label": "Dirac Opteo"
+          },
+          {
+            "id": 3,
+            "key": "pop",
+            "label": "Pop"
+          },
+          {
+            "id": 1,
+            "key": "rock",
+            "label": "Rock"
+          },
+          {
+            "id": 5,
+            "key": "classical",
+            "label": "Classical"
+          },
+          {
+            "id": 2,
+            "key": "electronic",
+            "label": "Electronic"
+          },
+          {
+            "id": 4,
+            "key": "vocals",
+            "label": "Vocals"
+          },
+          {
+            "id": 6,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 6,
+        "trebleHz": 6900
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": true,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Buds Pro",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": false,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": false,
+      "dualRestarts": false,
+      "personalSound": null,
+      "gestures": null
+    }
+  },
+  {
+    "name": "Ear (2)",
+    "capabilities": {
+      "transparency": true,
+      "strengths": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "adaptive": true,
+      "bassSteps": 0,
+      "inEar": true,
+      "lowLatency": true,
+      "ring": "buds",
+      "eq": {
+        "style": "eq",
+        "presets": [
+          {
+            "id": 0,
+            "key": "balanced",
+            "label": "Balanced"
+          },
+          {
+            "id": 3,
+            "key": "moreBass",
+            "label": "More Bass"
+          },
+          {
+            "id": 2,
+            "key": "moreTreble",
+            "label": "More Treble"
+          },
+          {
+            "id": 1,
+            "key": "voice",
+            "label": "Voice"
+          },
+          {
+            "id": 5,
+            "key": "custom",
+            "label": "Custom"
+          }
+        ],
+        "customId": 5,
+        "trebleHz": 3400
+      },
+      "spatialModes": [],
+      "dualConnection": true,
+      "dualRestarts": true,
+      "personalSound": "mimi",
+      "gestures": null
+    }
+  }
+]

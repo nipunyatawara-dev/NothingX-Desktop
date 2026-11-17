@@ -1,0 +1,27 @@
+[
+  {
+    "pid": 220,
+    "process": "app",
+    "physical_footprint": "26.4M"
+  },
+  {
+    "pid": 222,
+    "process": "WebKit GPU",
+    "physical_footprint": "12.6M"
+  },
+  {
+    "pid": 223,
+    "process": "WebKit WebContent",
+    "physical_footprint": "27.7M"
+  },
+  {
+    "pid": 224,
+    "process": "WebKit Networking",
+    "physical_footprint": "6336K"
+  },
+  {
+    "pid": 225,
+    "process": "Bluetooth helper",
+    "physical_footprint": "3729K"
+  }
+]
