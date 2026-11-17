@@ -14,7 +14,7 @@ A lightweight menu-bar and tray companion for macOS and Windows.</p>
   <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/issues">Report an issue</a>
 </p>
 
-> **Credit where it belongs:** This project builds on **[Nothing X Mac](https://github.com/yashraut362/nothing-x-mac) by [Yash Raut](https://github.com/yashraut362)**. His open-source application, panel design and Bluetooth work made this rebuild possible. Thanks also to the **[Radiance ear-web contributors](https://github.com/radiance-project/ear-web)** for the underlying protocol and device knowledge.
+> **Credit where it belongs:** This project builds on **[Nothing X Mac](https://github.com/yashraut362/nothing-x-mac) by [Yash Raut](https://github.com/yashraut362)**. The original UI design and panel layout are his work, retained in this rebuild with updated branding. His open-source application and Bluetooth work made this rebuild possible. Thanks also to the **[Radiance ear-web contributors](https://github.com/radiance-project/ear-web)** for the underlying protocol and device knowledge.
 
 Rebuilt with **Rust and the system webview**, NothingX Desktop keeps the familiar
 compact panel while replacing the Electron runtime. Check your battery, change
@@ -43,6 +43,20 @@ access. All packages are built locally, without GitHub Actions.
 
 Available controls depend on the headphone model and firmware. Missing battery
 readings stay unknown rather than showing a misleading zero.
+
+## Screenshots
+
+**Original UI design and panel layout by [Yash Raut](https://github.com/yashraut362),
+creator of [Nothing X Mac](https://github.com/yashraut362/nothing-x-mac).**
+These screenshots show the NothingX Desktop rebuild with CMF Buds 2 Plus.
+
+| Battery and noise control | Equalizer |
+| --- | --- |
+| ![Main panel showing CMF Buds 2 Plus battery levels and noise controls](docs/screenshots/main-panel.png) | ![Equalizer presets and custom bass, mid and treble controls](docs/screenshots/equalizer.png) |
+
+| Quick Settings | Earbud controls |
+| --- | --- |
+| ![Quick Settings with sound features, dual connection and firmware information](docs/screenshots/quick-settings.png) | ![Right earbud gesture mappings on the Controls page](docs/screenshots/controls.png) |
 
 ## Platform and device support
 
