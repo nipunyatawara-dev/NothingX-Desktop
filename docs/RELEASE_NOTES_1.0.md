@@ -1,56 +1,46 @@
 # NothingX Desktop 1.0
 
-A lightweight menu-bar and tray companion for Nothing and CMF headphones,
-rebuilt with Rust, the system webview and native Bluetooth transports.
+First release of NothingX Desktop, a menu-bar and system-tray app for Nothing and CMF headphones rebuilt in Rust using the OS webview and native Bluetooth.
 
 ## Downloads
 
-- **Apple Silicon Mac:** `NothingX-Desktop-1.0.0-macos-arm64.dmg`
-- **Intel Mac:** `NothingX-Desktop-1.0.0-macos-intel.dmg`
-- **Windows x64:** `NothingX-Desktop-1.0.0-windows-x64-setup.exe`
-- A portable Windows ZIP, corresponding source ZIP and SHA-256 checksums are also attached.
+- Apple Silicon Mac: `NothingX-Desktop-1.0.0-macos-arm64.dmg`
+- Intel Mac: `NothingX-Desktop-1.0.0-macos-intel.dmg`
+- Windows x64 installer: `NothingX-Desktop-1.0.0-windows-x64-setup.exe`
+- Portable Windows ZIP, source archive, and `SHA256SUMS.txt` are also attached.
 
-On macOS, open the DMG and drag the app to Applications. On Windows, setup
-installs for the current user and offers Start menu and optional Desktop
-shortcuts. If WebView2 is missing, setup installs Microsoft's Evergreen Runtime
-using the bundled bootstrapper; that step needs internet access.
+On macOS, open the DMG and drag `NothingX Desktop.app` to Applications. On Windows, the installer sets up the app for your user account and installs Microsoft Edge WebView2 if it is missing (this requires internet access).
 
-## What's included
+## Opening the unsigned builds
 
-- Battery and charging readings, supported noise controls, bass, EQ, quick settings, dual connection and gestures.
-- The familiar compact panel with sharp icons, translucent Mac material and adaptive menu-bar artwork.
-- Left-click to toggle, outside-click dismissal, short opening/closing fades and the panel power button to quit. Right-click does nothing.
-- Reconnection to already-connected headphones after restarting the app, without resetting the Bluetooth audio connection.
-- Release-audit fixes for rapid custom-EQ changes, headphone battery rendering, unsupported noise controls and Windows wording. Unused methods were removed and model profiles are cached.
+Neither build is notarized or code-signed with a paid developer certificate, so your OS will block it on first launch.
 
-This refreshed **v1.0** release includes the spatial-audio status fix for
-one-byte earbud replies, capsule-shaped ANC intensity controls, and the
-**Ultra Bass** name throughout the interface. The README includes the supplied
-UI screenshots and explicit credit to Yash Raut for the original UI design.
+On macOS ("app can't be opened"):
+1. Open **System Settings > Privacy & Security** and click **Open Anyway**.
+2. Or clear the quarantine flag in Terminal:
+   ```sh
+   xattr -cr "/Applications/NothingX Desktop.app"
+   ```
 
-## Compatibility and signing
+On Windows (SmartScreen / security warning):
+1. Click **More info** (or **View more**).
+2. Click **Run anyway**.
 
-**CMF Buds 2 Plus is the verified device.** The owner reports 2–3 hours of
-successful use. Other model profiles are inherited from the upstream projects
-and remain unverified on hardware. Available features depend on model and firmware.
+## What is in 1.0
 
-Requires **macOS 13+** or **Windows 10/11 x64**. Apple Silicon runtime checks,
-Rust tests, cross-platform linting and package checks are recorded in the source's
-validation notes. Intel binaries are architecture checked; Intel execution and
-native Windows installation, UI and Bluetooth testing remain pending.
+- Battery and charging status for left earbud, right earbud, and case.
+- Noise control modes (ANC, transparency, capsule-shaped ANC intensity) and Ultra Bass.
+- EQ presets and custom bass, mid, and treble sliders.
+- Quick settings for in-ear detection, low latency, spatial audio, dual connection, Find sounds, and earbud gesture controls.
+- Auto-reconnection to already paired headphones without dropping Bluetooth audio.
+- Compact translucent popover on macOS and tray panel on Windows. Left-click the tray icon to open, click outside to close, and use the power button to quit.
 
-Mac packages are **ad-hoc signed and unnotarized**. Windows packages are
-**unsigned**. Operating-system security prompts may appear when opening them.
+## Support
 
-This release was built and uploaded manually. **No GitHub Actions were used;
-Actions is disabled for this repository.**
+CMF Buds 2 Plus is tested on Apple Silicon (macOS 13+), with 2 to 3 hours of daily use. Other Nothing and CMF profiles are carried over from upstream and are unverified on hardware.
+
+Intel Mac and Windows 10/11 x64 builds are compiled and packaged, but native runtime and Bluetooth testing on those platforms is still pending. Built locally without GitHub Actions.
 
 ## Credits
 
-Thanks to **[Yash Raut / Nothing X Mac](https://github.com/yashraut362/nothing-x-mac)**
-for the original application, panel and Bluetooth work, and to the
-**[Radiance ear-web contributors](https://github.com/radiance-project/ear-web)**
-for protocol and model knowledge. Retained notices and AGPL-3.0-only terms are
-included with the source and packages.
-
-This is an unofficial community project, unaffiliated with Nothing or CMF.
+Original UI design and Mac app by [Yash Raut (Nothing X Mac)](https://github.com/yashraut362/nothing-x-mac). Protocol and device profiles from the [Radiance ear-web contributors](https://github.com/radiance-project/ear-web). Licensed under AGPL-3.0-only. Unofficial community project, not affiliated with Nothing or CMF.

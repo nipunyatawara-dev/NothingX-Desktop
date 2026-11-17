@@ -60,41 +60,32 @@ These screenshots show the NothingX Desktop rebuild with CMF Buds 2 Plus.
 
 ## Platform and device support
 
-| Platform | Current status |
+| Platform | Status |
 | --- | --- |
-| macOS 13+, Apple Silicon | **CMF Buds 2 Plus** tested, including 2–3 hours of use reported by the owner |
-| macOS 13+, Intel | Included in the universal build; Intel runtime testing pending |
-| Windows 10/11, x64 | Cross-built and compile checked; native UI and Bluetooth testing pending |
+| macOS 13+, Apple Silicon | Tested with CMF Buds 2 Plus (2 to 3 hours of use) |
+| macOS 13+, Intel | Built in universal binary; runtime testing pending |
+| Windows 10/11, x64 | Cross-built and compile-checked; runtime and Bluetooth testing pending |
 
-**CMF Buds 2 Plus is the primary test device.** Profiles for other Nothing and
-CMF models are carried over from the upstream projects, but have not all been
-verified on hardware. A model profile is not a guarantee of compatibility.
+Only **CMF Buds 2 Plus** is tested on hardware. Other Nothing and CMF profiles come from upstream and may behave differently.
 
 ## Get started
 
-1. Download your package above, or install on macOS with Homebrew:
+1. Download a release above, or install with Homebrew on macOS:
 
    ```sh
    brew install --cask nipunyatawara-dev/tap/nothingx-desktop
    ```
 
-   On macOS DMG installs, drag **NothingX Desktop** to **Applications**. On Windows, run the setup executable. [Building from source](#build-from-source) is also supported.
-2. Pair and connect your headphones in the system's Bluetooth settings. Allow Bluetooth access when macOS asks.
-3. **Left-click the menu-bar or tray icon** to open the panel. Click outside to dismiss it. Use the panel's **power button** to quit. Right-click has no menu.
+   On macOS, drag `NothingX Desktop.app` to Applications. On Windows, run the setup executable.
+2. If your OS blocks the first launch (builds are not notarized or code-signed):
+   On macOS, open **System Settings > Privacy & Security** and click **Open Anyway**, or run `xattr -cr "/Applications/NothingX Desktop.app"`.
+   On Windows, click **More info** (or **View more**), then **Run anyway**.
+3. Pair your earbuds in system Bluetooth settings and allow Bluetooth access if macOS prompts.
+4. Left-click the menu-bar or tray icon to open the panel, click outside to hide it, and use the panel's power button to quit.
 
-The app discovers headphones that are already connected, including after an app
-restart. First status readings can take about eight seconds on the tested Mac.
-If another desktop controller or the phone companion app is holding the control
-channel, close it and let NothingX Desktop retry. Audio pairing stays with the
-operating system.
-
-Some models restart when dual connection is changed; the panel identifies that
-action. Remove earbuds before using Find sounds. A sound stops automatically
-after 30 seconds, and **Stop Sound** ends it sooner.
+If status does not appear after a few seconds, close any other Nothing or CMF app holding the Bluetooth control channel so NothingX Desktop can connect. Remove earbuds before playing Find sounds (stops automatically after 30 seconds, or click **Stop Sound**).
 
 ## Build from source
-
-Clone this repository first:
 
 ```sh
 git clone https://github.com/nipunyatawara-dev/NothingX-Desktop.git
@@ -103,57 +94,35 @@ cd NothingX-Desktop
 
 ### macOS
 
-Install a current Rust toolchain, Python 3.11+ and Xcode Command Line Tools with Swift 6.
+Requires Rust, Python 3.11+, and Xcode Command Line Tools (Swift 6):
 
 ```sh
-# Build for your Mac
+# Current Mac
 bash scripts/build-macos.sh
 
-# Or build a universal app for Apple Silicon and Intel
+# Universal (Apple Silicon + Intel)
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
 bash scripts/build-macos.sh --universal
 
 open "dist/NothingX Desktop.app"
 ```
 
-The script creates the application, a ZIP, corresponding source and dependency
-notices in `dist/`. macOS builds are ad-hoc signed and are not notarized.
-
 ### Windows
 
-Install Rust's MSVC toolchain, Visual Studio C++ Build Tools, Python 3.11+, NSIS
-(`makensis` on PATH) and the
-[Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
-Run this from PowerShell:
+Requires Rust (MSVC), Visual Studio C++ Build Tools, Python 3.11+, NSIS (`makensis` on `PATH`), and the [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1
 ```
 
-The script creates a portable ZIP and per-user setup executable in `dist/`,
-including `WebView2Loader.dll`. Windows builds are unsigned.
-
-For local release packaging on macOS, install `mingw-w64` and `nsis` with
-Homebrew, add the `aarch64-apple-darwin`, `x86_64-apple-darwin` and
-`x86_64-pc-windows-gnu` Rust targets, then run `bash scripts/build-release.sh`.
-It builds both DMGs and Windows packages, source and SHA-256 checksums.
-Publishing is a separate manual step; no CI or Actions workflow is included.
+Outputs land in `dist/`. To cross-build all macOS and Windows release artifacts from macOS, install `mingw-w64` and `nsis` via Homebrew, add the `aarch64-apple-darwin`, `x86_64-apple-darwin`, and `x86_64-pc-windows-gnu` Rust targets, then run `bash scripts/build-release.sh`.
 
 ## Under the hood
 
-Rust owns protocol parsing, device state, reconnection and application lifecycle.
-[Wry](https://github.com/tauri-apps/wry) hosts the existing HTML/CSS/JavaScript
-panel in WKWebView on macOS and WebView2 on Windows. A small Swift IOBluetooth
-helper provides macOS RFCOMM; Windows uses native RFCOMM sockets from Rust.
-The panel needs no Node.js runtime or frontend build pipeline.
-
-The current universal macOS application is approximately **6 MiB**.
-See the [validation notes](docs/VALIDATION.md) for measured memory use, hardware
-checks and their limits. Webview processes still consume memory; this project
-does not claim a measured RAM reduction against the original app.
+Rust handles protocol parsing, device state, and reconnection. [Wry](https://github.com/tauri-apps/wry) renders the HTML/CSS/JS panel in WKWebView on macOS and WebView2 on Windows. Bluetooth RFCOMM runs through a small Swift IOBluetooth helper on macOS and native WinSock sockets on Windows, with no Node.js runtime or frontend build step.
 
 <details>
-<summary><strong>Development and verification</strong></summary>
+<summary>Development and verification</summary>
 
 ```sh
 cargo test --locked
@@ -161,31 +130,19 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 node scripts/check-ui.cjs
 
-# UI simulation; no Bluetooth helper or device changes
+# UI simulation without Bluetooth hardware
 cargo run -- --simulate "CMF Buds 2 Plus" --open
 
-# After building the macOS Bluetooth helper
+# Live run (after building the macOS Bluetooth helper)
 cargo run
 ```
 
-Protocol tests cover reference packets, CRC, fragmented and malformed messages,
-battery decoding, confirmed changes, timeouts and disconnect cleanup.
-Simulation supports UI work without changing headphone settings.
-
-See the [architecture notes](docs/PLAN.md), [validation record](docs/VALIDATION.md)
-and [artwork notes](docs/BRANDING.md). Device-specific bug reports are most useful
-with the model, firmware, OS version and steps to reproduce.
+See [PLAN.md](docs/PLAN.md), [VALIDATION.md](docs/VALIDATION.md), and [BRANDING.md](docs/BRANDING.md) for architecture notes, memory measurements, and artwork details.
 
 </details>
 
 ## Credits and license
 
-Maintained by [Nipun Yatawara](https://github.com/nipunyatawara-dev).
-Original application and panel: **[Yash Raut / Nothing X Mac](https://github.com/yashraut362/nothing-x-mac)**.
-Protocol and device lineage: **[Radiance ear-web](https://github.com/radiance-project/ear-web)**.
+Maintained by [Nipun Yatawara](https://github.com/nipunyatawara-dev). Original app and UI by [Yash Raut (Nothing X Mac)](https://github.com/yashraut362/nothing-x-mac), with protocol work from [Radiance ear-web](https://github.com/radiance-project/ear-web).
 
-Distributed under **[AGPL-3.0-only](LICENSE)**. Retained upstream credits and
-license notices are in [THIRD_PARTY.md](THIRD_PARTY.md).
-
-NothingX Desktop is an unofficial community project, unaffiliated with and not
-endorsed by Nothing or CMF. Product names and trademarks belong to their owners.
+Licensed under [AGPL-3.0-only](LICENSE). Third-party notices are in [THIRD_PARTY.md](THIRD_PARTY.md). Unofficial community project, unaffiliated with Nothing or CMF.
