@@ -484,7 +484,12 @@ impl Device {
             0x4022 | 0x405a | 0xe019 | 0x6019 if p.first().is_some_and(|v| *v <= 1) => {
                 self.report(Key::Personal, Value::Flag(p[0] == 1))
             }
-            0x404f if p.len() >= 2 => self.report(Key::Spatial, Value::Pair(p[0], p[1])),
+            // Some buds report only the mode. The optional head-tracking byte
+            // defaults to zero, matching the upstream wire decoder.
+            0x404f if !p.is_empty() => self.report(
+                Key::Spatial,
+                Value::Pair(p[0], p.get(1).copied().unwrap_or(0)),
+            ),
             0x401f | 0x4050 if !p.is_empty() => self.report(Key::Preset, Value::Byte(p[0])),
             0x4044 => {
                 if let Some(bands) = decode_eq(p) {

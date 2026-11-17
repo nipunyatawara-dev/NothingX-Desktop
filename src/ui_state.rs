@@ -323,4 +323,33 @@ mod tests {
         assert_eq!(s["capabilities"]["spatialModes"], json!([]));
         assert_eq!(crate::models::all().len(), 20);
     }
+    #[test]
+    fn spatial_mode_reports_reach_the_tile_and_confirm_pending_changes() {
+        use crate::{device::Action, protocol};
+        use std::time::Instant;
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
+        assert_eq!(snapshot(&d)["quick"]["spatial"], Json::Null);
+        d.receive(&protocol::encode(0x404f, &[], 1).unwrap());
+        assert_eq!(snapshot(&d)["quick"]["spatial"], Json::Null);
+        for payload in [&[0][..], &[1][..], &[0, 0][..], &[1, 0][..]] {
+            d.receive(&protocol::encode(0x404f, payload, 1).unwrap());
+            assert_eq!(
+                snapshot(&d)["quick"]["spatial"],
+                if payload[0] == 0 { "off" } else { "fixed" }
+            );
+        }
+        d.action(Action::Set(Key::Spatial, Value::Pair(0, 0)), Instant::now());
+        assert!(d.is_pending(Key::Spatial));
+        d.receive(&protocol::encode(0x404f, &[0], 2).unwrap());
+        assert!(!d.is_pending(Key::Spatial));
+        assert_eq!(snapshot(&d)["quick"]["spatial"], "off");
+        d.action(Action::Set(Key::Spatial, Value::Pair(1, 0)), Instant::now());
+        assert!(d.is_pending(Key::Spatial));
+        d.receive(&protocol::encode(0x404f, &[1], 3).unwrap());
+        assert!(!d.is_pending(Key::Spatial));
+        assert_eq!(snapshot(&d)["quick"]["spatial"], "fixed");
+        d.receive(&protocol::encode(0x404f, &[1, 1], 3).unwrap());
+        assert_eq!(snapshot(&d)["quick"]["spatial"], "headTracked");
+    }
 }

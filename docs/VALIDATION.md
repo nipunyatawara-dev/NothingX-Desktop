@@ -132,3 +132,18 @@ Modern Web Guidance `security` shaped the bridge: “Validate and sanitize the
 properties of incoming message payloads”. IPC is restricted to the embedded
 app origin, commands are validated in Rust, assets have explicit MIME types,
 and the existing CSP is preserved. No remote scripts are loaded.
+
+## Spatial-audio follow-up fix
+
+The Rust decoder required two bytes for a spatial-audio status report, while the
+upstream decoder accepts a single mode byte and defaults the optional
+head-tracking byte to zero. One-byte reports were discarded, leaving the
+settings tile unknown. The decoder now accepts both layouts, preserving an
+empty report as unknown. Regression coverage checks Off, Fixed, Head Tracked
+and pending-change confirmation from one-byte reports.
+
+20 Rust tests and macOS/Windows Clippy checks passed for this fix. The universal
+Mac application was rebuilt and the installed app updated. A read-only live
+check with CMF Buds 2 Plus returned spatial mode `off`, with no pending change,
+where the previous build displayed an unknown state. Earbud settings were not
+changed during the live check; on/off confirmation paths use protocol fixtures.
