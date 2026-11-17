@@ -72,7 +72,13 @@ verified on hardware. A model profile is not a guarantee of compatibility.
 
 ## Get started
 
-1. Download your package above. On macOS open the DMG and drag **NothingX Desktop** to **Applications**. On Windows run the setup executable. [Building from source](#build-from-source) is also supported.
+1. Download your package above, or install on macOS with Homebrew:
+
+   ```sh
+   brew install --cask nipunyatawara-dev/tap/nothingx-desktop
+   ```
+
+   On macOS DMG installs, drag **NothingX Desktop** to **Applications**. On Windows, run the setup executable. [Building from source](#build-from-source) is also supported.
 2. Pair and connect your headphones in the system's Bluetooth settings. Allow Bluetooth access when macOS asks.
 3. **Left-click the menu-bar or tray icon** to open the panel. Click outside to dismiss it. Use the panel's **power button** to quit. Right-click has no menu.
 
