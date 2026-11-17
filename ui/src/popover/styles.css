@@ -1,4 +1,5 @@
 :root {
+  --capsule-radius: 999px;
   --accent: #007aff;
   --text: rgba(0, 0, 0, 0.85);
   --text-secondary: rgba(0, 0, 0, 0.5);
@@ -257,7 +258,7 @@ hr {
   gap: 2px;
   margin: 2px 14px 0;
   padding: 2px;
-  border-radius: 8px;
+  border-radius: var(--capsule-radius);
   background: var(--chip);
 }
 
@@ -270,7 +271,7 @@ hr {
   gap: 5px;
   padding: 5px 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--capsule-radius);
   background: transparent;
   color: var(--text-secondary);
   font: inherit;
@@ -323,7 +324,7 @@ hr {
 .section .option,
 .section .segment { transition: opacity 150ms ease, background-color 150ms ease; }
 
-/* Bass Enhance: Control Center style toggle + stepped capsule slider */
+/* Ultra Bass: Control Center style toggle + stepped capsule slider */
 .bass-row {
   display: flex;
   align-items: center;
@@ -354,7 +355,7 @@ hr {
   position: relative;
   flex: 1;
   height: 24px;
-  border-radius: 12px;
+  border-radius: var(--capsule-radius);
   background: var(--chip);
   overflow: hidden;
   cursor: default;
@@ -366,7 +367,7 @@ hr {
   position: absolute;
   inset: 0 auto 0 0;
   width: 0;
-  border-radius: 12px;
+  border-radius: var(--capsule-radius);
   background: var(--accent);
   transition: width 180ms ease;
 }

@@ -1,4 +1,4 @@
-// Bass Enhance, Control Center style: a round speaker button turns it on/off,
+// Ultra Bass, Control Center style: a round speaker button turns it on/off,
 // and a stepped capsule slider sets the level. Each step shows a waveform
 // icon that grows with the level; filled steps turn white.
 //
