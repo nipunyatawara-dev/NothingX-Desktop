@@ -7,7 +7,7 @@
 A lightweight menu-bar and tray companion for macOS and Windows.</p>
 
 <p align="center">
-  <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/tag/v1.0.0">Download 1.0</a> ·
+  <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/tag/v1.0">Download 1.0</a> ·
   <a href="#get-started">Get started</a> ·
   <a href="#features">Features</a> ·
   <a href="#build-from-source">Build from source</a> ·
@@ -25,9 +25,9 @@ below, or use the Windows x64 installer. Windows runtime testing is still pendin
 
 | Download | Requirements |
 | --- | --- |
-| [macOS · Apple Silicon DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-macos-arm64.dmg) | macOS 13+, M-series Mac |
-| [macOS · Intel DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-macos-intel.dmg) | macOS 13+, Intel Mac; runtime testing pending |
-| [Windows · x64 installer](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0.0/NothingX-Desktop-1.0.0-windows-x64-setup.exe) | Windows 10/11 x64; runtime testing pending |
+| [macOS · Apple Silicon DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-macos-arm64.dmg) | macOS 13+, M-series Mac |
+| [macOS · Intel DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-macos-intel.dmg) | macOS 13+, Intel Mac; runtime testing pending |
+| [Windows · x64 installer](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-windows-x64-setup.exe) | Windows 10/11 x64; runtime testing pending |
 
 The Mac builds are ad-hoc signed and unnotarized; Windows builds are unsigned.
 The Windows installer installs WebView2 only if missing, which needs internet

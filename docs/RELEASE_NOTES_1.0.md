@@ -23,6 +23,11 @@ using the bundled bootstrapper; that step needs internet access.
 - Reconnection to already-connected headphones after restarting the app, without resetting the Bluetooth audio connection.
 - Release-audit fixes for rapid custom-EQ changes, headphone battery rendering, unsupported noise controls and Windows wording. Unused methods were removed and model profiles are cached.
 
+This refreshed **v1.0** release includes the spatial-audio status fix for
+one-byte earbud replies, capsule-shaped ANC intensity controls, and the
+**Ultra Bass** name throughout the interface. The README includes the supplied
+UI screenshots and explicit credit to Yash Raut for the original UI design.
+
 ## Compatibility and signing
 
 **CMF Buds 2 Plus is the verified device.** The owner reports 2–3 hours of
