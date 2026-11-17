@@ -20,8 +20,8 @@ Rebuilt with **Rust and the system webview**, NothingX Desktop keeps the familia
 compact panel while replacing the Electron runtime. Check your battery, change
 noise control and adjust supported earbud settings from the menu bar or taskbar.
 
-**Version 1.0 is available as a manual release.** Choose your Mac architecture
-below, or use the Windows x64 installer. Windows runtime testing is still pending.
+**Version 1.0 is available. Whole app is just 4.5MB.** 
+Choose your Mac architecture below, or use the Windows x64 installer. Windows runtime testing is still pending.
 
 | Download | Requirements |
 | --- | --- |
