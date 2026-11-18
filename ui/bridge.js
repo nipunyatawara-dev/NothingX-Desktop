@@ -27,6 +27,8 @@
   }
   window.addEventListener('error', event => send('uiError', [event.message]));
   window.addEventListener('unhandledrejection', event => send('uiError', [String(event.reason)]));
+  window.addEventListener('blur', () => send('windowBlur'));
+  window.addEventListener('contextmenu', event => event.preventDefault());
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   send('motionPreference', [reducedMotion.matches]);
   reducedMotion.addEventListener('change', event => send('motionPreference', [event.matches]));

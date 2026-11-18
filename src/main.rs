@@ -31,6 +31,42 @@ pub enum Event {
     Tray(TrayIconEvent),
     Ipc(String),
     OutsideClick,
+    Reopen,
+}
+
+fn reopen(
+    d: &mut Device,
+    now: Instant,
+    bluetooth: &mut Option<transport::Transport>,
+    panel: &Option<panel::Panel>,
+    tray: &Option<tray_icon::TrayIcon>,
+) {
+    d.action(Action::Refresh, now);
+    if !d.connected
+        && let Some(t) = bluetooth
+    {
+        t.refresh();
+    }
+    if let (Some(p), Some(tray)) = (panel, tray) {
+        p.show(tray);
+    }
+}
+
+fn write_status(path: &std::path::Path, state: &Json, d: &Device, visibility: (bool, bool)) {
+    let Ok(bytes) = serde_json::to_vec_pretty(&json!({
+        "device": state,
+        "message": d.message,
+        "simulation": d.simulation,
+        "popoverVisible": visibility.0,
+        "popoverOpen": visibility.1,
+    })) else {
+        return;
+    };
+    let tmp = path.with_extension("tmp");
+    if std::fs::write(&tmp, &bytes).is_err() || std::fs::rename(&tmp, path).is_err() {
+        let _ = std::fs::remove_file(&tmp);
+        let _ = std::fs::write(path, bytes);
+    }
 }
 
 fn main() {
@@ -66,11 +102,32 @@ fn main() {
     let _lock = match platform::single_instance(simulation.is_some()) {
         Ok(f) => f,
         Err(e) => {
+            if simulation.is_none() {
+                platform::notify_running_instance();
+            }
             eprintln!("App already running or lock unavailable: {e}");
             return;
         }
     };
     let mut builder = EventLoopBuilder::<Event>::with_user_event();
+    #[cfg(windows)]
+    let reopen_proxy =
+        Arc::new(std::sync::OnceLock::<tao::event_loop::EventLoopProxy<Event>>::new());
+    #[cfg(windows)]
+    {
+        use tao::platform::windows::EventLoopBuilderExtWindows;
+        let hook_proxy = reopen_proxy.clone();
+        builder.with_msg_hook(move |msg| {
+            let msg = unsafe { &*(msg as *const windows_sys::Win32::UI::WindowsAndMessaging::MSG) };
+            if msg.message == platform::WM_REOPEN {
+                if let Some(proxy) = hook_proxy.get() {
+                    let _ = proxy.send_event(Event::Reopen);
+                }
+                return true;
+            }
+            false
+        });
+    }
     let event_loop = builder.build();
     #[cfg(target_os = "macos")]
     let event_loop = {
@@ -80,6 +137,8 @@ fn main() {
         loop_
     };
     let proxy = event_loop.create_proxy();
+    #[cfg(windows)]
+    let _ = reopen_proxy.set(proxy.clone());
     let popup_selection = Arc::new(Mutex::new(None::<String>));
     let selected = popup_selection.clone();
     MenuEvent::set_event_handler(Some(move |e: MenuEvent| {
@@ -141,7 +200,8 @@ fn main() {
                 ..
             } => {
                 if let Some(p) = &panel
-                    && p.window.is_visible()
+                    && p.is_open()
+                    && !p.has_focus()
                     && now >= ignore_blur_until
                 {
                     p.hide();
@@ -163,18 +223,11 @@ fn main() {
             } => {
                 if let (Some(tray), Some(p)) = (&tray, &panel) {
                     panel::update_tray_icon(tray, &p.window);
+                    p.on_theme_changed();
                 }
             }
             TaoEvent::Reopen { .. } => {
-                d.action(Action::Refresh, now);
-                if !d.connected
-                    && let Some(t) = &mut bluetooth
-                {
-                    t.refresh();
-                }
-                if let (Some(p), Some(tray)) = (&panel, &tray) {
-                    p.show(tray);
-                }
+                reopen(&mut d, now, &mut bluetooth, &panel, &tray);
                 changed = true;
             }
             TaoEvent::UserEvent(event) => {
@@ -187,8 +240,17 @@ fn main() {
                     Event::Data(bytes) => d.receive(&bytes),
                     Event::Disconnected => d.disconnect(),
                     Event::OutsideClick => {
-                        changed=false;
-                        if let Some(p)=&panel && p.is_open() && now>=ignore_blur_until {p.hide();last_hidden=now;}
+                        changed = false;
+                        if let Some(p) = &panel
+                            && p.is_open()
+                            && now >= ignore_blur_until
+                        {
+                            p.hide();
+                            last_hidden = now;
+                        }
+                    }
+                    Event::Reopen => {
+                        reopen(&mut d, now, &mut bluetooth, &panel, &tray);
                     }
                     Event::Tray(TrayIconEvent::Enter { .. }) => {
                         if let (Some(tray), Some(p)) = (&tray, &panel) {
@@ -210,22 +272,21 @@ fn main() {
                         ..
                     }) => {
                         if let (Some(p), Some(tray)) = (&panel, &tray)
-                            && button == MouseButton::Left {
-                                if p.is_open() {
-                                    p.hide();
-                                    last_hidden = now;
-                                } else if now.duration_since(last_hidden)
-                                    > Duration::from_millis(250)
+                            && button == MouseButton::Left
+                        {
+                            if p.is_open() {
+                                p.hide();
+                                last_hidden = now;
+                            } else if now.duration_since(last_hidden) > Duration::from_millis(250) {
+                                d.action(Action::Refresh, now);
+                                if !d.connected
+                                    && let Some(t) = &mut bluetooth
                                 {
-                                    d.action(Action::Refresh, now);
-                                    if !d.connected
-                                        && let Some(t) = &mut bluetooth
-                                    {
-                                        t.refresh();
-                                    }
-                                    p.show(tray);
+                                    t.refresh();
                                 }
+                                p.show(tray);
                             }
+                        }
                     }
                     Event::Ipc(body) => {
                         if let Ok(message) = serde_json::from_str::<Json>(&body) {
@@ -255,6 +316,14 @@ fn main() {
                                         }
                                     }
                                     "quit" => quit = true,
+                                    "windowBlur" => {
+                                        changed = false;
+                                        if p.is_open() && !p.has_focus() && now >= ignore_blur_until
+                                        {
+                                            p.hide();
+                                            last_hidden = now;
+                                        }
+                                    }
                                     "popupMenu" => {
                                         let menu = Menu::new();
                                         let items = args.first().and_then(Json::as_array);
@@ -276,9 +345,12 @@ fn main() {
                                                 args.get(1).and_then(Json::as_f64).unwrap_or(0.);
                                             let y =
                                                 args.get(2).and_then(Json::as_f64).unwrap_or(0.);
+                                            ignore_blur_until =
+                                                Instant::now() + Duration::from_secs(60);
                                             p.popup(&menu, Some((x, y)));
                                             ignore_blur_until =
                                                 Instant::now() + Duration::from_millis(250);
+                                            let _ = p.web.focus();
                                             let chosen = popup_selection
                                                 .lock()
                                                 .unwrap()
@@ -343,21 +415,14 @@ fn main() {
                 d.message = e;
             }
         }
+        let mut status_dirty = false;
         if changed {
             let state = ui_state::snapshot(&d);
             if state != signature {
-                signature = state.clone();
+                signature = state;
+                status_dirty = true;
                 if ready && let Some(p) = &panel {
-                    p.state(&state);
-                }
-                if let Some(path) = &status_path {
-                    let _ = std::fs::write(
-                        path,
-                        serde_json::to_vec_pretty(
-                            &json!({"device":state,"message":d.message,"simulation":d.simulation}),
-                        )
-                        .unwrap(),
-                    );
+                    p.state(&signature);
                 }
                 if let Some(tray) = &tray {
                     let _ = tray.set_tooltip(Some(if d.connected {
@@ -371,10 +436,20 @@ fn main() {
         if let Some(p) = &panel {
             p.tick(now);
         }
-        let visibility=panel.as_ref().map(|p|(p.window.is_visible(),p.is_open())).unwrap_or_default();
-        if visibility!=previous_visibility {
-            previous_visibility=visibility;
-            if let Some(path)=&status_path {let _=std::fs::write(path,serde_json::to_vec_pretty(&json!({"device":ui_state::snapshot(&d),"message":d.message,"simulation":d.simulation,"popoverVisible":visibility.0,"popoverOpen":visibility.1})).unwrap());}
+        let visibility = panel
+            .as_ref()
+            .map(|p| (p.window.is_visible(), p.is_open()))
+            .unwrap_or_default();
+        if visibility != previous_visibility {
+            previous_visibility = visibility;
+            status_dirty = true;
+        }
+        if status_dirty && let Some(path) = &status_path {
+            if signature.is_null() {
+                write_status(path, &ui_state::snapshot(&d), &d, visibility);
+            } else {
+                write_status(path, &signature, &d, visibility);
+            }
         }
         *flow = d
             .deadline()

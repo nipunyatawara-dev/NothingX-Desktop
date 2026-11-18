@@ -57,15 +57,24 @@ impl Parser {
         let mut frames = Vec::new();
         // Process incrementally: a hostile input chunk cannot grow retained memory.
         for &byte in chunk {
+            if self.buffer.is_empty() && byte != 0x55 {
+                continue;
+            }
             self.buffer.push(byte);
             loop {
-                let Some(start) = self.buffer.iter().position(|b| *b == 0x55) else {
-                    self.buffer.clear();
-                    break;
-                };
-                self.buffer.drain(..start);
+                if self.buffer.first() != Some(&0x55) {
+                    let Some(start) = self.buffer.iter().position(|b| *b == 0x55) else {
+                        self.buffer.clear();
+                        break;
+                    };
+                    self.buffer.drain(..start);
+                }
                 if self.buffer.len() < HEADER {
                     break;
+                }
+                if self.buffer[1] != 0x60 || self.buffer[2] != 0x01 || self.buffer[6] != 0x00 {
+                    self.buffer.remove(0);
+                    continue;
                 }
                 let length = OVERHEAD + usize::from(self.buffer[5]);
                 if self.buffer.len() < length {
@@ -160,6 +169,21 @@ mod tests {
         let mut parser = Parser::default();
         assert_eq!(parser.push(&input).len(), 2);
         assert!(parser.buffer.len() <= MAX_PAYLOAD + OVERHEAD);
+    }
+    #[test]
+    fn stray_start_byte_does_not_stall_following_valid_frame() {
+        let valid = encode(0x4007, &[1, 2, 80], 1).unwrap();
+        let mut input = vec![0x55, 0x00, 0x00, 0x00, 0x00, 255, 0x00, 0x00];
+        input.extend(&valid);
+        let mut parser = Parser::default();
+        assert_eq!(
+            parser.push(&input),
+            vec![Frame {
+                command: 0x4007,
+                operation: 1,
+                payload: vec![1, 2, 80],
+            }]
+        );
     }
     #[test]
     fn oversized_payload_and_bad_hex_are_rejected() {

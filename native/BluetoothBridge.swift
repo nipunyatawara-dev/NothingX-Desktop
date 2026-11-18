@@ -7,13 +7,14 @@ import CoreBluetooth
 
 @MainActor
 func emit(_ object: [String: String]) {
-    guard let data = try? JSONSerialization.data(withJSONObject: object) else { return }
+    guard var data = try? JSONSerialization.data(withJSONObject: object) else { return }
+    data.append(10)
     FileHandle.standardOutput.write(data)
-    FileHandle.standardOutput.write(Data([10]))
 }
 
 @MainActor
 final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelDelegate, @preconcurrency CBCentralManagerDelegate {
+    private static let hexDigits: [UInt8] = Array("0123456789abcdef".utf8)
     private let service = IOBluetoothSDPUUID(bytes: [UInt8]([
         0xae, 0xac, 0x4a, 0x03, 0xdf, 0xf5, 0x49, 0x8f,
         0x84, 0x3a, 0x34, 0x48, 0x7c, 0xf1, 0x33, 0xeb,
@@ -52,13 +53,23 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
         delay = min(delay * 1.5, 8)
     }
 
+    private func candidatePriority(_ device: IOBluetoothDevice) -> Int {
+        if device.getServiceRecord(for: service) != nil { return 0 }
+        let lower = (device.name ?? "").lowercased()
+        if lower.contains("nothing") || lower.contains("cmf") { return 1 }
+        return 2
+    }
+
     private func scan() {
         guard !stopping, channel == nil else { return }
         let paired = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] ?? []
-        if ProcessInfo.processInfo.environment["NXM_DEBUG"] == "1" {
-            emit(["type": "log", "message": "Bluetooth authorization \(CBManager.authorization.rawValue); paired \(paired.count); connected \(paired.filter { $0.isConnected() }.count)"])
+        let connected = paired.filter { $0.isConnected() }.sorted {
+            candidatePriority($0) < candidatePriority($1)
         }
-        for device in paired where device.isConnected() {
+        if ProcessInfo.processInfo.environment["NXM_DEBUG"] == "1" {
+            emit(["type": "log", "message": "Bluetooth authorization \(CBManager.authorization.rawValue); paired \(paired.count); connected \(connected.count)"])
+        }
+        for device in connected {
             if ProcessInfo.processInfo.environment["NXM_DEBUG"] == "1" {
                 emit(["type": "log", "message": "Connected Bluetooth candidate: \(device.name ?? "unnamed"); cached services: \(device.services?.count ?? 0)"])
             }
@@ -178,7 +189,13 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
         guard channel === self.channel, ready, !stopping else { return }
         guard length > 0, length <= 4096, let pointer else { return }
         let data = Data(bytes: pointer, count: length)
-        emit(["type": "data", "hex": data.map { String(format: "%02x", $0) }.joined()])
+        var encoded = [UInt8]()
+        encoded.reserveCapacity(length * 2)
+        for byte in data {
+            encoded.append(Self.hexDigits[Int(byte >> 4)])
+            encoded.append(Self.hexDigits[Int(byte & 0x0f)])
+        }
+        emit(["type": "data", "hex": String(decoding: encoded, as: UTF8.self)])
     }
     func rfcommChannelClosed(_ closed: IOBluetoothRFCOMMChannel!) {
         guard closed === channel else { return }

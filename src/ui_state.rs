@@ -25,20 +25,7 @@ pub fn mac(address: [u8; 6]) -> String {
 pub fn snapshot(d: &Device) -> Json {
     let mut caps = match &d.caps {
         Some(c) => {
-            static PROFILES: OnceLock<Json> = OnceLock::new();
-            let data = PROFILES.get_or_init(|| {
-                serde_json::from_str(include_str!("../assets/models.json"))
-                    .expect("embedded profiles")
-            });
-            let name = d.name.to_lowercase();
-            let mut caps = data
-                .as_array()
-                .unwrap()
-                .iter()
-                .filter(|m| name.contains(&m["name"].as_str().unwrap().to_lowercase()))
-                .max_by_key(|m| m["name"].as_str().unwrap().len())
-                .map(|m| m["capabilities"].clone())
-                .unwrap_or(Json::Null);
+            let mut caps = serde_json::to_value(c).unwrap_or(Json::Null);
             caps["bassSteps"] = json!(c.bass_steps);
             caps["bassLevels"] = if c.bass_steps == 3 {
                 json!([1, 2])
@@ -156,7 +143,7 @@ pub fn command(d: &Device, name: &str, args: &[Json]) -> Option<crate::device::A
             Value::Byte(match first.as_str()? {
                 "anc" => byte(d, Key::Noise)
                     .filter(|n| (1..=4).contains(n))
-                    .unwrap_or(1),
+                    .unwrap_or(d.last_anc),
                 "transparency" => 7,
                 "off" => 5,
                 _ => return None,
@@ -294,7 +281,13 @@ pub fn command(d: &Device, name: &str, args: &[Json]) -> Option<crate::device::A
 }
 
 pub fn appearance() -> Json {
-    serde_json::from_str(include_str!("../assets/appearance.json")).expect("embedded appearance")
+    static APPEARANCE: OnceLock<Json> = OnceLock::new();
+    APPEARANCE
+        .get_or_init(|| {
+            serde_json::from_str(include_str!("../assets/appearance.json"))
+                .expect("embedded appearance")
+        })
+        .clone()
 }
 pub fn init(d: &Device) -> Json {
     let mut a = appearance();
@@ -351,5 +344,23 @@ mod tests {
         assert_eq!(snapshot(&d)["quick"]["spatial"], "fixed");
         d.receive(&protocol::encode(0x404f, &[1, 1], 3).unwrap());
         assert_eq!(snapshot(&d)["quick"]["spatial"], "headTracked");
+    }
+    #[test]
+    fn anc_strength_is_restored_after_switching_mode() {
+        use std::time::Instant;
+        let mut d = Device::simulate("CMF Buds 2 Plus");
+        let now = Instant::now();
+        for (strength, code) in [("adaptive", 4u8), ("low", 3u8)] {
+            let set_strength = command(&d, "setAncStrength", &[json!(strength)]).unwrap();
+            d.action(set_strength, now);
+            assert_eq!(d.last_anc, code);
+            let set_off = command(&d, "setNoiseMode", &[json!("off")]).unwrap();
+            d.action(set_off, now);
+            assert_eq!(snapshot(&d)["noiseMode"], "off");
+            let set_anc = command(&d, "setNoiseMode", &[json!("anc")]).unwrap();
+            d.action(set_anc, now);
+            assert_eq!(snapshot(&d)["noiseMode"], "anc");
+            assert_eq!(snapshot(&d)["ancStrength"], strength);
+        }
     }
 }

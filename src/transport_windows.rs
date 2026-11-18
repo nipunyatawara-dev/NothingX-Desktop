@@ -133,10 +133,16 @@ fn run(proxy: EventLoopProxy<Event>, rx: Receiver<Vec<u8>>, wake: WSAEVENT, stop
         if stop.load(Ordering::Acquire) {
             break;
         }
+        let woken =
+            unsafe { WSAWaitForMultipleEvents(1, &(wake as *mut core::ffi::c_void), 0, retry, 0) };
         unsafe {
-            WSAWaitForMultipleEvents(1, &(wake as *mut core::ffi::c_void), 0, retry, 0);
+            WSAResetEvent(wake);
         }
-        retry = (retry * 2).min(30_000);
+        retry = if woken == 0 {
+            3_000
+        } else {
+            (retry * 2).min(30_000)
+        };
     }
 }
 
@@ -179,6 +185,7 @@ fn candidates() -> Vec<(String, u64)> {
         }
         BluetoothFindDeviceClose(find);
     }
+    result.sort_by_key(|(name, _)| nothingx_desktop::models::find(name).is_none());
     result
 }
 
@@ -218,8 +225,28 @@ fn open(address: u64, wake: WSAEVENT, stop: &AtomicBool) -> Option<(Socket, NetE
                 wake as *mut core::ffi::c_void,
                 raw_event as *mut core::ffi::c_void,
             ];
-            let selected = WSAWaitForMultipleEvents(2, events.as_ptr(), 0, 8_000, 0);
-            if selected != 1 || stop.load(Ordering::Acquire) {
+            let deadline = Instant::now() + Duration::from_secs(8);
+            loop {
+                if stop.load(Ordering::Acquire) {
+                    return None;
+                }
+                let remaining = deadline
+                    .saturating_duration_since(Instant::now())
+                    .as_millis() as u32;
+                if remaining == 0 {
+                    return None;
+                }
+                let selected = WSAWaitForMultipleEvents(2, events.as_ptr(), 0, remaining, 0);
+                if stop.load(Ordering::Acquire) {
+                    return None;
+                }
+                if selected == 0 {
+                    WSAResetEvent(wake);
+                    continue;
+                }
+                if selected == 1 {
+                    break;
+                }
                 return None;
             }
             let mut network = WSANETWORKEVENTS::default();

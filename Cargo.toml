@@ -22,7 +22,7 @@ block2 = "0.6.2"
 objc2-app-kit = { version = "0.3.2", features = ["NSColor", "NSColorSpace", "NSWindow", "NSView", "NSApplication"] }
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Devices_Bluetooth", "Win32_Networking_WinSock", "Win32_System_Registry", "Win32_Security", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Devices_Bluetooth", "Win32_Networking_WinSock", "Win32_System_Registry", "Win32_Security", "Win32_UI_WindowsAndMessaging", "Win32_Graphics_Dwm"] }
 
 [profile.release]
 opt-level = "s"

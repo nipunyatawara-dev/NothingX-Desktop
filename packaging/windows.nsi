@@ -40,17 +40,29 @@ Function .onInit
     MessageBox MB_OK|MB_ICONSTOP "NothingX Desktop requires 64-bit Windows 10 or Windows 11."
     Abort
   ${EndIf}
+  SetRegView 64
   SetShellVarContext current
 FunctionEnd
 
 Function CheckWebView2
-  ; The machine-wide runtime is registered in the 32-bit registry view.
-  SetRegView 32
+  SetRegView 64
   ReadRegStr $0 HKCU "${WEBVIEW2_CLIENT}" "pv"
   ${If} $0 == ""
   ${OrIf} $0 == "0.0.0.0"
-    ReadRegStr $0 HKLM "${WEBVIEW2_CLIENT}" "pv"
+    ; The machine-wide runtime is typically registered in the 32-bit registry view.
+    SetRegView 32
+    ReadRegStr $0 HKCU "${WEBVIEW2_CLIENT}" "pv"
+    ${If} $0 == ""
+    ${OrIf} $0 == "0.0.0.0"
+      ReadRegStr $0 HKLM "${WEBVIEW2_CLIENT}" "pv"
+    ${EndIf}
+    SetRegView 64
+    ${If} $0 == ""
+    ${OrIf} $0 == "0.0.0.0"
+      ReadRegStr $0 HKLM "${WEBVIEW2_CLIENT}" "pv"
+    ${EndIf}
   ${EndIf}
+  SetRegView 64
 FunctionEnd
 
 Function CheckAppClosed
@@ -113,6 +125,11 @@ Section /o "Desktop shortcut"
   CreateShortcut "$DESKTOP\NothingX Desktop.lnk" "$INSTDIR\nothingx-desktop.exe"
 SectionEnd
 
+Function un.onInit
+  SetRegView 64
+  SetShellVarContext current
+FunctionEnd
+
 Section "Uninstall"
   SetShellVarContext current
   ; Remove only this install's files. Keep local preferences and shared WebView2.
@@ -126,6 +143,7 @@ Section "Uninstall"
     ${EndIf}
     FileClose $0
   ${EndIf}
+  RMDir /r "$INSTDIR\nothingx-desktop.exe.WebView2"
   Delete "$INSTDIR\nothingx-desktop.exe"
   Delete "$INSTDIR\WebView2Loader.dll"
   Delete "$INSTDIR\README.md"

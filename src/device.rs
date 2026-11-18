@@ -67,6 +67,7 @@ pub struct Device {
     pub ringing: Option<u8>,
     pub dual_busy: Option<([u8; 6], Instant)>,
     pub simulation: bool,
+    pub last_anc: u8,
     parser: Parser,
     operation: u8,
     queue: VecDeque<(u16, Vec<u8>)>,
@@ -93,6 +94,7 @@ impl Default for Device {
             ringing: None,
             dual_busy: None,
             simulation: false,
+            last_anc: 1,
             parser: Parser::default(),
             operation: 0,
             queue: VecDeque::new(),
@@ -346,8 +348,20 @@ impl Device {
                     return;
                 };
                 if self.simulation {
+                    if key == Key::Noise
+                        && let Value::Byte(code) = target
+                        && (1..=4).contains(&code)
+                    {
+                        self.last_anc = code;
+                    }
                     self.values.insert(key, target);
                     return;
+                }
+                if key == Key::Noise
+                    && let Value::Byte(code) = target
+                    && (1..=4).contains(&code)
+                {
+                    self.last_anc = code;
                 }
                 if key == Key::CustomEq {
                     self.queue.retain(|(command, _)| *command != set);
@@ -431,7 +445,21 @@ impl Device {
                 self.message = "Settings confirmed by the headphones.".into();
             }
         }
+        if key == Key::Noise
+            && let Value::Byte(code) = value
+            && (1..=4).contains(&code)
+        {
+            self.last_anc = code;
+        }
         self.values.insert(key, value);
+    }
+    fn sort_devices(&mut self) {
+        self.devices.sort_by(|a, b| {
+            b.is_self
+                .cmp(&a.is_self)
+                .then(b.connected.cmp(&a.connected))
+                .then(a.name.cmp(&b.name))
+        });
     }
     pub fn receive(&mut self, chunk: &[u8]) {
         if !self.connected {
@@ -524,16 +552,12 @@ impl Device {
                     self.dual_pages += 1;
                     self.enqueue(0xc028, vec![self.devices.len() as u8]);
                 }
-                self.devices.sort_by(|a, b| {
-                    b.is_self
-                        .cmp(&a.is_self)
-                        .then(b.connected.cmp(&a.connected))
-                        .then(a.name.cmp(&b.name))
-                });
+                self.sort_devices();
             }
             0xe00e if p.len() >= 7 => {
                 if let Some(d) = self.devices.iter_mut().find(|d| d.address == p[1..7]) {
                     d.connected = p[0] == 1;
+                    self.sort_devices();
                 } else {
                     self.refresh_dual();
                 }
