@@ -66,7 +66,6 @@ pub struct Device {
     pub message: String,
     pub ringing: Option<u8>,
     pub dual_busy: Option<([u8; 6], Instant)>,
-    pub simulation: bool,
     pub last_anc: u8,
     parser: Parser,
     operation: u8,
@@ -93,7 +92,6 @@ impl Default for Device {
             message: "Pair and connect your headphones in Bluetooth settings.".into(),
             ringing: None,
             dual_busy: None,
-            simulation: false,
             last_anc: 1,
             parser: Parser::default(),
             operation: 0,
@@ -127,70 +125,6 @@ impl Device {
         *self = Self::default();
         self.message = "Disconnected. Waiting for a connected Nothing or CMF device…".into();
     }
-    pub fn simulate(name: &str) -> Self {
-        let mut d = Self::default();
-        d.on_connected(name.into(), "Simulation".into());
-        d.simulation = true;
-        d.message = "SIMULATION — no Bluetooth connection".into();
-        d.queue.clear();
-        d.battery = BTreeMap::from([
-            (
-                2,
-                Battery {
-                    level: 87,
-                    charging: false,
-                },
-            ),
-            (
-                3,
-                Battery {
-                    level: 80,
-                    charging: false,
-                },
-            ),
-            (
-                4,
-                Battery {
-                    level: 62,
-                    charging: true,
-                },
-            ),
-        ]);
-        d.values = BTreeMap::from([
-            (Key::Noise, Value::Byte(1)),
-            (Key::Bass, Value::Pair(1, 6)),
-            (Key::InEar, Value::Flag(true)),
-            (Key::LowLatency, Value::Flag(false)),
-            (Key::Personal, Value::Flag(false)),
-            (Key::Spatial, Value::Pair(0, 0)),
-            (Key::Preset, Value::Byte(3)),
-            (Key::CustomEq, Value::Eq([0, 0, 0])),
-            (Key::Dual, Value::Flag(true)),
-        ]);
-        d.firmware = "Simulation".into();
-        d.name = format!("{name} · Simulation");
-        d.devices = vec![
-            DualDevice {
-                address: [1, 2, 3, 4, 5, 6],
-                name: "This computer".into(),
-                is_self: true,
-                connected: true,
-            },
-            DualDevice {
-                address: [6, 5, 4, 3, 2, 1],
-                name: "Phone (demo)".into(),
-                is_self: false,
-                connected: false,
-            },
-        ];
-        for side in [2, 3] {
-            for (slot, action) in [(2, 2), (3, 9), (7, 22), (9, 18)] {
-                d.values
-                    .insert(Key::Gesture(side, slot), Value::Byte(action));
-            }
-        }
-        d
-    }
     pub fn is_pending(&self, key: Key) -> bool {
         self.pending.contains_key(&key)
     }
@@ -202,7 +136,7 @@ impl Device {
     }
 
     fn enqueue(&mut self, command: u16, payload: Vec<u8>) {
-        if self.connected && !self.simulation && self.queue.len() < 64 {
+        if self.connected && self.queue.len() < 64 {
             self.queue.push_back((command, payload));
         }
     }
@@ -347,16 +281,6 @@ impl Device {
                 let Some(payload) = self.payload(key, &target) else {
                     return;
                 };
-                if self.simulation {
-                    if key == Key::Noise
-                        && let Value::Byte(code) = target
-                        && (1..=4).contains(&code)
-                    {
-                        self.last_anc = code;
-                    }
-                    self.values.insert(key, target);
-                    return;
-                }
                 if key == Key::Noise
                     && let Value::Byte(code) = target
                     && (1..=4).contains(&code)
@@ -378,7 +302,7 @@ impl Device {
                 self.message = "Waiting for the headphones to confirm the change…".into();
             }
             Action::Refresh => {
-                if !self.simulation && self.queue.is_empty() {
+                if self.queue.is_empty() {
                     self.query_all();
                 }
             }
@@ -406,12 +330,6 @@ impl Device {
                 if connect && self.devices.iter().filter(|d| d.connected).count() >= 2 {
                     return;
                 }
-                if self.simulation {
-                    if let Some(d) = self.devices.iter_mut().find(|d| d.address == address) {
-                        d.connected = connect;
-                    }
-                    return;
-                }
                 let mut p = vec![u8::from(connect)];
                 p.extend(address);
                 self.enqueue(0xf01b, p);
@@ -429,7 +347,7 @@ impl Device {
     pub fn stop_ring(&mut self) {
         if let Some(side) = self.ringing.take() {
             let p = self.ring_payload(side, false);
-            if self.connected && !self.simulation {
+            if self.connected {
                 self.queue.push_front((0xf002, p));
             }
         }
@@ -588,11 +506,7 @@ impl Device {
         if !self.connected {
             return None;
         }
-        let mut next = if self.simulation {
-            None
-        } else {
-            Some(self.next_battery)
-        };
+        let mut next = Some(self.next_battery);
         for at in self
             .pending
             .values()
@@ -633,7 +547,7 @@ impl Device {
             }
             self.read(key);
         }
-        if !self.simulation && now >= self.next_battery {
+        if now >= self.next_battery {
             self.enqueue(0xc007, vec![]);
             self.next_battery = now + Duration::from_secs(60);
         }
@@ -795,22 +709,46 @@ mod tests {
         assert!(decode_eq(&[255]).is_none());
     }
     #[test]
-    fn ring_automatically_stops_and_simulation_never_writes() {
-        let mut d = Device::simulate("CMF Buds 2 Plus");
+    fn ring_automatically_stops() {
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
+        d.queue.clear();
         let now = Instant::now();
         d.action(Action::Ring(2), now);
         assert_eq!(d.ringing, Some(2));
-        assert!(d.tick(now + Duration::from_secs(31)).is_empty());
+        assert_eq!(d.tick(now).len(), 1);
+        let frames = Parser::default().push(&d.tick(now + Duration::from_secs(31))[0]);
         assert!(d.ringing.is_none());
+        assert_eq!(
+            (frames[0].command, frames[0].payload.as_slice()),
+            (0xf002, [2, 0].as_slice())
+        );
     }
     #[test]
     fn dual_self_and_connection_limit_are_protected() {
-        let mut d = Device::simulate("CMF Buds 2 Plus");
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
+        d.values.insert(Key::Dual, Value::Flag(true));
+        d.devices = vec![
+            DualDevice {
+                address: [1, 2, 3, 4, 5, 6],
+                name: "Host".into(),
+                is_self: true,
+                connected: true,
+            },
+            DualDevice {
+                address: [6, 5, 4, 3, 2, 1],
+                name: "Second".into(),
+                is_self: false,
+                connected: false,
+            },
+        ];
+        d.queue.clear();
         let now = Instant::now();
         d.action(Action::DualConnect([1, 2, 3, 4, 5, 6], false), now);
-        assert!(d.devices[0].connected);
+        assert!(d.queue.is_empty());
         d.action(Action::DualConnect([6, 5, 4, 3, 2, 1], true), now);
-        assert!(d.devices[1].connected);
+        assert_eq!(d.queue.len(), 1);
         assert!(decode_dual(&[0, 0, 1, 0, 1]).is_none());
     }
     #[test]

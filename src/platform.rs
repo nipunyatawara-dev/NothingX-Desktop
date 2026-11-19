@@ -28,7 +28,7 @@ pub fn data_dir() -> PathBuf {
     }
 }
 
-pub fn single_instance(simulation: bool) -> io::Result<fs::File> {
+pub fn single_instance() -> io::Result<fs::File> {
     let dir = data_dir();
     fs::create_dir_all(&dir)?;
     let file = fs::OpenOptions::new()
@@ -36,11 +36,7 @@ pub fn single_instance(simulation: bool) -> io::Result<fs::File> {
         .truncate(false)
         .read(true)
         .write(true)
-        .open(dir.join(if simulation {
-            "simulation.lock"
-        } else {
-            "app.lock"
-        }))?;
+        .open(dir.join("app.lock"))?;
     fs2::FileExt::try_lock_exclusive(&file)?;
     Ok(file)
 }

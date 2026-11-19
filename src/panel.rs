@@ -124,6 +124,7 @@ impl Panel {
             window_builder
                 .with_skip_taskbar(true)
                 .with_drag_and_drop(false)
+                .with_undecorated_shadow(false)
                 .with_window_classname("NothingXDesktopWindow")
         };
         let window = window_builder.build(target)?;
@@ -327,9 +328,11 @@ impl Panel {
         #[cfg(windows)]
         {
             use tao::platform::windows::WindowExtWindows;
+            use windows_sys::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, IsChild};
+            let hwnd = self.window.hwnd() as *mut core::ffi::c_void;
             unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::GetForegroundWindow()
-                    == self.window.hwnd() as *mut core::ffi::c_void
+                let fg = GetForegroundWindow();
+                fg == hwnd || (!fg.is_null() && IsChild(hwnd, fg) != 0)
             }
         }
     }
@@ -565,7 +568,14 @@ fn apply_windows_backdrop(window: &Window) {
             size_of::<u32>() as u32,
         );
     }
-    let tint = if window.theme() == tao::window::Theme::Dark {
+    let dark = match read_hkcu_dword(
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "AppsUseLightTheme",
+    ) {
+        Some(light) => light == 0,
+        None => window.theme() == tao::window::Theme::Dark,
+    };
+    let tint = if dark {
         (36, 36, 36, 190)
     } else {
         (240, 240, 240, 190)

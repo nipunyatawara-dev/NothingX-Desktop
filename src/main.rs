@@ -40,6 +40,7 @@ fn reopen(
     bluetooth: &mut Option<transport::Transport>,
     panel: &Option<panel::Panel>,
     tray: &Option<tray_icon::TrayIcon>,
+    ignore_blur_until: &mut Instant,
 ) {
     d.action(Action::Refresh, now);
     if !d.connected
@@ -48,6 +49,7 @@ fn reopen(
         t.refresh();
     }
     if let (Some(p), Some(tray)) = (panel, tray) {
+        *ignore_blur_until = now + Duration::from_millis(250);
         p.show(tray);
     }
 }
@@ -56,7 +58,6 @@ fn write_status(path: &std::path::Path, state: &Json, d: &Device, visibility: (b
     let Ok(bytes) = serde_json::to_vec_pretty(&json!({
         "device": state,
         "message": d.message,
-        "simulation": d.simulation,
         "popoverVisible": visibility.0,
         "popoverOpen": visibility.1,
     })) else {
@@ -76,17 +77,9 @@ fn main() {
         return;
     }
     if args.iter().any(|s| s == "--help") {
-        println!(
-            "NothingX Desktop\n--version\n--simulate [model]\n--open\n--status-file PATH\n--quit-after SECONDS"
-        );
+        println!("NothingX Desktop\n--version\n--open\n--status-file PATH\n--quit-after SECONDS");
         return;
     }
-    let simulation = args.iter().position(|s| s == "--simulate");
-    let model = simulation
-        .and_then(|i| args.get(i + 1))
-        .filter(|s| !s.starts_with("--"))
-        .map(String::as_str)
-        .unwrap_or("CMF Buds 2 Plus");
     let quit_at = args
         .iter()
         .position(|s| s == "--quit-after")
@@ -99,12 +92,10 @@ fn main() {
         .and_then(|i| args.get(i + 1))
         .map(std::path::PathBuf::from);
     let auto_open = args.iter().any(|s| s == "--open");
-    let _lock = match platform::single_instance(simulation.is_some()) {
+    let _lock = match platform::single_instance() {
         Ok(f) => f,
         Err(e) => {
-            if simulation.is_none() {
-                platform::notify_running_instance();
-            }
+            platform::notify_running_instance();
             eprintln!("App already running or lock unavailable: {e}");
             return;
         }
@@ -150,11 +141,7 @@ fn main() {
     TrayIconEvent::set_event_handler(Some(move |e| {
         let _ = tray_proxy.send_event(Event::Tray(e));
     }));
-    let mut d = if simulation.is_some() {
-        Device::simulate(model)
-    } else {
-        Device::default()
-    };
+    let mut d = Device::default();
     let mut tray = None;
     let mut panel: Option<panel::Panel> = None;
     let mut bluetooth: Option<transport::Transport> = None;
@@ -185,13 +172,11 @@ fn main() {
                     panel::update_tray_icon(tray, &p.window);
                 }
                 changed = true;
-                if simulation.is_none() {
-                    match transport::Transport::start(proxy.clone()) {
-                        Ok(t) => bluetooth = Some(t),
-                        Err(e) => {
-                            d.message = e;
-                            restart = Some(now + Duration::from_secs(10));
-                        }
+                match transport::Transport::start(proxy.clone()) {
+                    Ok(t) => bluetooth = Some(t),
+                    Err(e) => {
+                        d.message = e;
+                        restart = Some(now + Duration::from_secs(10));
                     }
                 }
             }
@@ -227,7 +212,14 @@ fn main() {
                 }
             }
             TaoEvent::Reopen { .. } => {
-                reopen(&mut d, now, &mut bluetooth, &panel, &tray);
+                reopen(
+                    &mut d,
+                    now,
+                    &mut bluetooth,
+                    &panel,
+                    &tray,
+                    &mut ignore_blur_until,
+                );
                 changed = true;
             }
             TaoEvent::UserEvent(event) => {
@@ -250,7 +242,14 @@ fn main() {
                         }
                     }
                     Event::Reopen => {
-                        reopen(&mut d, now, &mut bluetooth, &panel, &tray);
+                        reopen(
+                            &mut d,
+                            now,
+                            &mut bluetooth,
+                            &panel,
+                            &tray,
+                            &mut ignore_blur_until,
+                        );
                     }
                     Event::Tray(TrayIconEvent::Enter { .. }) => {
                         if let (Some(tray), Some(p)) = (&tray, &panel) {
@@ -284,6 +283,7 @@ fn main() {
                                 {
                                     t.refresh();
                                 }
+                                ignore_blur_until = now + Duration::from_millis(250);
                                 p.show(tray);
                             }
                         }
@@ -301,6 +301,7 @@ fn main() {
                                         p.reply(id, &init);
                                         ready = true;
                                         if auto_open && let Some(tray) = &tray {
+                                            ignore_blur_until = now + Duration::from_millis(250);
                                             p.show(tray);
                                         }
                                     }
@@ -381,6 +382,7 @@ fn main() {
             }
             TaoEvent::LoopDestroyed => {
                 bluetooth.take();
+                tray.take();
                 return;
             }
             _ => {}
@@ -393,6 +395,7 @@ fn main() {
                 }
             }
             bluetooth.take();
+            tray.take();
             *flow = ControlFlow::Exit;
             return;
         }

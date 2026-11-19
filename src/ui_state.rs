@@ -301,7 +301,10 @@ mod tests {
     use super::*;
     #[test]
     fn original_renderer_receives_complete_model_data() {
-        let d = Device::simulate("CMF Buds 2 Plus");
+        use crate::protocol;
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
+        d.receive(&protocol::encode(0x4007, &[1, 2, 87], 1).unwrap());
         let s = snapshot(&d);
         assert_eq!(s["capabilities"]["gestures"]["sides"]["left"], 2);
         assert_eq!(s["capabilities"]["eq"]["presets"][0]["key"], "pop");
@@ -347,18 +350,23 @@ mod tests {
     }
     #[test]
     fn anc_strength_is_restored_after_switching_mode() {
+        use crate::protocol;
         use std::time::Instant;
-        let mut d = Device::simulate("CMF Buds 2 Plus");
+        let mut d = Device::default();
+        d.on_connected("CMF Buds 2 Plus".into(), "test".into());
         let now = Instant::now();
         for (strength, code) in [("adaptive", 4u8), ("low", 3u8)] {
             let set_strength = command(&d, "setAncStrength", &[json!(strength)]).unwrap();
             d.action(set_strength, now);
+            d.receive(&protocol::encode(0x401e, &[1, code, 0], 1).unwrap());
             assert_eq!(d.last_anc, code);
             let set_off = command(&d, "setNoiseMode", &[json!("off")]).unwrap();
             d.action(set_off, now);
+            d.receive(&protocol::encode(0x401e, &[1, 5, 0], 2).unwrap());
             assert_eq!(snapshot(&d)["noiseMode"], "off");
             let set_anc = command(&d, "setNoiseMode", &[json!("anc")]).unwrap();
             d.action(set_anc, now);
+            d.receive(&protocol::encode(0x401e, &[1, code, 0], 3).unwrap());
             assert_eq!(snapshot(&d)["noiseMode"], "anc");
             assert_eq!(snapshot(&d)["ancStrength"], strength);
         }

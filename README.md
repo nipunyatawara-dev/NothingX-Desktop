@@ -130,9 +130,6 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 node scripts/check-ui.cjs
 
-# UI simulation without Bluetooth hardware
-cargo run -- --simulate "CMF Buds 2 Plus" --open
-
 # Live run (after building the macOS Bluetooth helper)
 cargo run
 ```
