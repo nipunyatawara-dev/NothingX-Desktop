@@ -33,6 +33,20 @@ The Mac builds are ad-hoc signed and unnotarized; Windows builds are unsigned.
 The Windows installer installs WebView2 only if missing, which needs internet
 access. All packages are built locally, without GitHub Actions.
 
+### macOS first launch
+
+The macOS builds are ad-hoc signed and unnotarized, so macOS may block the first launch with a warning that it cannot verify the developer or the app.
+
+1. Open the DMG, drag `NothingX Desktop.app` to **Applications**, then try to open the app from **Applications**.
+2. If macOS blocks it, go to **System Settings > Privacy & Security**, scroll down, click **Open Anyway**, and confirm. [Apple’s first-launch instructions](https://support.apple.com/en-us/102445)
+3. If **Open Anyway** is unavailable and you downloaded the DMG from this project’s GitHub release, run the following in Terminal, then open the app again from **Applications**.
+
+   ```sh
+   xattr -dr com.apple.quarantine "/Applications/NothingX Desktop.app"
+   ```
+
+The command removes the quarantine flag from the installed app bundle.
+
 ## Features
 
 - **Battery at a glance.** Left, right and case levels, plus charging state when reported by your device.
@@ -76,10 +90,7 @@ Only **CMF Buds 2 Plus** is tested on hardware. Other Nothing and CMF profiles c
    brew install --cask nipunyatawara-dev/tap/nothingx-desktop
    ```
 
-   On macOS, drag `NothingX Desktop.app` to Applications. On Windows, run the setup executable.
-2. If your OS blocks the first launch (builds are not notarized or code-signed):
-   On macOS, open **System Settings > Privacy & Security** and click **Open Anyway**, or run `xattr -cr "/Applications/NothingX Desktop.app"`.
-   On Windows, click **More info** (or **View more**), then **Run anyway**.
+2. Follow the [macOS first-launch steps](#macos-first-launch) if you downloaded the DMG. On Windows, run the setup executable. If SmartScreen appears, click **More info** (or **View more**), then **Run anyway**.
 3. Pair your earbuds in system Bluetooth settings and allow Bluetooth access if macOS prompts.
 4. Left-click the menu-bar or tray icon to open the panel, click outside to hide it, and use the panel's power button to quit.
 
