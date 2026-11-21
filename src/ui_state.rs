@@ -1,7 +1,10 @@
 //! Compatibility adapter for the original, unmodified Nothing X Mac renderer.
-use crate::device::{Device, Key, Value};
+use crate::device::{Device, Fallback, Key, Value};
 use serde_json::{Value as Json, json};
 use std::sync::OnceLock;
+
+pub const EAR_WEB_URL: &str = "https://earweb.bttl.xyz/";
+const ISSUES_NEW_URL: &str = "https://github.com/nipunyatawara-dev/NothingX-Desktop/issues/new";
 
 fn byte(d: &Device, key: Key) -> Option<u8> {
     match d.value(key) {
@@ -124,6 +127,16 @@ pub fn snapshot(d: &Device) -> Json {
             }
         }
     }
+    let (fb_mode, fb_name) = d.fallback();
+    let fallback = json!({
+        "mode": match fb_mode {
+            Fallback::None => "none",
+            Fallback::Unrecognized => "unrecognized",
+            Fallback::Unresponsive => "unresponsive",
+            Fallback::Limited => "limited",
+        },
+        "deviceName": fb_name,
+    });
     json!({"connected":d.connected,"name":if d.connected{Some(d.name.as_str())}else{None},"battery":battery,"computerLabel":"This computer",
         "noiseMode":noise,"ancStrength":strength,"noisePending":d.is_pending(Key::Noise),"bass":bass,"bassPending":d.is_pending(Key::Bass),
         "quick":{"inEar":flag(d,Key::InEar),"lowLatency":flag(d,Key::LowLatency),"personalSound":flag(d,Key::Personal),"spatial":spatial,
@@ -131,7 +144,60 @@ pub fn snapshot(d: &Device) -> Json {
             "firmware":if d.firmware.is_empty(){None}else{Some(d.firmware.as_str())},"ringing":d.ringing.map(|s|match s{2=>"left",3=>"right",_=>"all"})},
         "eq":{"preset":byte(d,Key::Preset),"pending":d.is_pending(Key::Preset),"custom":custom},
         "dual":{"enabled":flag(d,Key::Dual),"pending":d.is_pending(Key::Dual),"devices":d.devices.iter().map(|dev|json!({"mac":mac(dev.address),"name":dev.name,"isSelf":dev.is_self,"isConnected":dev.connected})).collect::<Vec<_>>(),"busyMac":d.dual_busy.map(|(a,_)|mac(a)),"maxConnected":2},
-        "gestures":gestures,"capabilities":caps})
+        "gestures":gestures,"capabilities":caps,"fallback":fallback})
+}
+
+pub fn issue_url(d: &Device) -> String {
+    let (mode, name) = d.fallback();
+    let device = name
+        .filter(|s| !s.trim().is_empty())
+        .or_else(|| {
+            d.connected
+                .then_some(d.name.as_str())
+                .filter(|s| !s.is_empty())
+        })
+        .unwrap_or("Unknown Nothing/CMF device");
+    let title = format!("Device support: {device}");
+    let status = match mode {
+        Fallback::Unrecognized => "Connected in Bluetooth, control channel not recognized",
+        Fallback::Unresponsive => "Connected over Bluetooth, no replies received",
+        Fallback::Limited => "Unlisted model using auto-detected basic controls",
+        Fallback::None => "Connected",
+    };
+    let os = if cfg!(target_os = "macos") {
+        "macOS"
+    } else if cfg!(windows) {
+        "Windows"
+    } else {
+        std::env::consts::OS
+    };
+    let firmware = if d.firmware.is_empty() {
+        "Unknown"
+    } else {
+        d.firmware.as_str()
+    };
+    let body = format!(
+        "Device name: {device}\nApp version: {}\nOS: {os}\nStatus: {status}\nFirmware: {firmware}\n\nWhat happened:\n- \n",
+        env!("CARGO_PKG_VERSION")
+    );
+    format!(
+        "{ISSUES_NEW_URL}?title={}&body={}",
+        percent_encode(&title),
+        percent_encode(&body)
+    )
+}
+
+fn percent_encode(input: &str) -> String {
+    use std::fmt::Write;
+    let mut out = String::with_capacity(input.len() * 2);
+    for b in input.bytes() {
+        if b.is_ascii_alphanumeric() || matches!(b, b'-' | b'_' | b'.' | b'~') {
+            out.push(char::from(b));
+        } else {
+            let _ = write!(out, "%{b:02X}");
+        }
+    }
+    out
 }
 
 pub fn command(d: &Device, name: &str, args: &[Json]) -> Option<crate::device::Action> {
@@ -370,5 +436,22 @@ mod tests {
             assert_eq!(snapshot(&d)["noiseMode"], "anc");
             assert_eq!(snapshot(&d)["ancStrength"], strength);
         }
+    }
+    #[test]
+    fn fallback_snapshot_and_issue_url_encode_device_details() {
+        let mut d = Device::default();
+        assert_eq!(snapshot(&d)["fallback"]["mode"], "none");
+
+        d.set_unrecognized(Some("CMF Buds (3)".into()));
+        let s = snapshot(&d);
+        assert_eq!(s["fallback"]["mode"], "unrecognized");
+        assert_eq!(s["fallback"]["deviceName"], "CMF Buds (3)");
+
+        let url = issue_url(&d);
+        assert!(url.starts_with(
+            "https://github.com/nipunyatawara-dev/NothingX-Desktop/issues/new?title=Device%20support%3A%20CMF%20Buds%20%283%29&body="
+        ));
+        assert!(!url.contains(' '));
+        assert!(!url.contains('\n'));
     }
 }

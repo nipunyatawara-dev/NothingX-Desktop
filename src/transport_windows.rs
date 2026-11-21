@@ -99,20 +99,37 @@ impl Drop for Transport {
     }
 }
 
+fn is_nothing_like_name(name: &str) -> bool {
+    let lower = name.trim().to_lowercase();
+    lower.contains("nothing")
+        || lower.contains("cmf")
+        || lower.starts_with("ear (")
+        || lower.starts_with("ear(")
+        || lower.contains("buds pro")
+        || lower.contains("neckband pro")
+}
+
 fn run(proxy: EventLoopProxy<Event>, rx: Receiver<Vec<u8>>, wake: WSAEVENT, stop: Arc<AtomicBool>) {
     let mut retry = 3_000;
+    let mut failed_scans: u32 = 0;
+    let mut last_unrecognized: Option<String> = None;
     while !stop.load(Ordering::Acquire) {
-        for (name, address) in candidates() {
+        let devices = candidates();
+        let mut connected_any = false;
+        for (name, address) in &devices {
             if stop.load(Ordering::Acquire) {
                 return;
             }
-            let Some((socket, event)) = open(address, wake, &stop) else {
+            let Some((socket, event)) = open(*address, wake, &stop) else {
                 continue;
             };
+            connected_any = true;
+            failed_scans = 0;
+            last_unrecognized = None;
             // Commands from a previous connection may never leak into a new one.
             while rx.try_recv().is_ok() {}
             if proxy
-                .send_event(Event::Connected(name, format!("{address:012X}")))
+                .send_event(Event::Connected(name.clone(), format!("{address:012X}")))
                 .is_err()
             {
                 return;
@@ -121,6 +138,25 @@ fn run(proxy: EventLoopProxy<Event>, rx: Receiver<Vec<u8>>, wake: WSAEVENT, stop
             let _ = proxy.send_event(Event::Disconnected);
             retry = 3_000;
             break;
+        }
+        if !connected_any {
+            let next = if let Some((name, _)) =
+                devices.iter().find(|(name, _)| is_nothing_like_name(name))
+            {
+                failed_scans = failed_scans.saturating_add(1);
+                if failed_scans >= 2 {
+                    Some(name.clone())
+                } else {
+                    last_unrecognized.clone()
+                }
+            } else {
+                failed_scans = 0;
+                None
+            };
+            if next != last_unrecognized {
+                last_unrecognized = next.clone();
+                let _ = proxy.send_event(Event::Unrecognized(next));
+            }
         }
         if stop.load(Ordering::Acquire) {
             break;

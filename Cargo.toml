@@ -1,6 +1,6 @@
 [package]
 name = "nothingx-desktop"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2024"
 description = "Lightweight native tray controls for Nothing and CMF headphones"
 license = "AGPL-3.0-only"

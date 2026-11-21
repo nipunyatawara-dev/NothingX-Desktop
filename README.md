@@ -7,27 +7,28 @@
 A lightweight menu-bar and tray companion for macOS and Windows.</p>
 
 <p align="center">
-  <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/tag/v1.0">Download 1.0</a> ·
+  <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/tag/v1.1">Download 1.1</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
   <a href="#get-started">Get started</a> ·
   <a href="#features">Features</a> ·
   <a href="#build-from-source">Build from source</a> ·
   <a href="https://github.com/nipunyatawara-dev/NothingX-Desktop/issues">Report an issue</a>
 </p>
 
-> **Credit where it belongs:** This project builds on **[Nothing X Mac](https://github.com/yashraut362/nothing-x-mac) by [Yash Raut](https://github.com/yashraut362)**. The original UI design and panel layout are his work, retained in this rebuild with updated branding. His open-source application and Bluetooth work made this rebuild possible. Thanks also to the **[Radiance ear-web contributors](https://github.com/radiance-project/ear-web)** for the underlying protocol and device knowledge.
+> **Credit where it belongs:** This project builds on **[Nothing X Mac](https://github.com/yashraut362/nothing-x-mac) by [Yash Raut](https://github.com/yashraut362)**. The original UI design and panel layout are his work, retained in this rebuild with updated branding. His open-source application and Bluetooth work made this rebuild possible. Thanks also to the **[Radiance ear-web contributors](https://github.com/radiance-project/ear-web)** ([earweb.bttl.xyz](https://earweb.bttl.xyz/)) for the underlying protocol, device knowledge, and browser fallback.
 
 Rebuilt with **Rust and the system webview**, NothingX Desktop keeps the familiar
 compact panel while replacing the Electron runtime. Check your battery, change
 noise control and adjust supported earbud settings from the menu bar or taskbar.
 
-**Version 1.0 is available. Whole app is just 4.5MB.** 
-Choose your Mac architecture below, or use the Windows x64 installer. Windows runtime testing is still pending.
+**Version 1.1 is available for macOS (about 4.3 MB installed).**
+Choose your Mac architecture below. The Windows 1.1 build is currently in development and will be added after Windows testing finishes. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 | Download | Requirements |
 | --- | --- |
-| [macOS · Apple Silicon DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-macos-arm64.dmg) | macOS 13+, M-series Mac |
-| [macOS · Intel DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-macos-intel.dmg) | macOS 13+, Intel Mac; runtime testing pending |
-| [Windows · x64 installer](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-windows-x64-setup.exe) | Windows 10/11 x64; runtime testing pending |
+| [macOS · Apple Silicon DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.1/NothingX-Desktop-1.1.0-macos-arm64.dmg) | macOS 13+, M-series Mac |
+| [macOS · Intel DMG](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.1/NothingX-Desktop-1.1.0-macos-intel.dmg) | macOS 13+, Intel Mac; runtime testing pending |
+| Windows · x64 installer (v1.1) | Currently in development ([v1.0 installer](https://github.com/nipunyatawara-dev/NothingX-Desktop/releases/download/v1.0/NothingX-Desktop-1.0.0-windows-x64-setup.exe) stays on v1.0) |
 
 The Mac builds are ad-hoc signed and unnotarized; Windows builds are unsigned.
 The Windows installer installs WebView2 only if missing, which needs internet
@@ -76,11 +77,11 @@ These screenshots show the NothingX Desktop rebuild with CMF Buds 2 Plus.
 
 | Platform | Status |
 | --- | --- |
-| macOS 13+, Apple Silicon | Tested with CMF Buds 2 Plus (2 to 3 hours of use) |
+| macOS 13+, Apple Silicon | Tested with CMF Buds 2 Plus and CMF Buds Pro 2 |
 | macOS 13+, Intel | Built in universal binary; runtime testing pending |
-| Windows 10/11, x64 | Cross-built and compile-checked; runtime and Bluetooth testing pending |
+| Windows 10/11, x64 | v1.1 currently in development |
 
-Only **CMF Buds 2 Plus** is tested on hardware. Other Nothing and CMF profiles come from upstream and may behave differently.
+CMF Buds 2 Plus and CMF Buds Pro 2 are verified on Apple Silicon hardware. Unlisted Nothing and CMF models auto-probe supported controls at runtime; if a connected Nothing or CMF device still cannot be recognized or does not respond, the panel offers direct links to [ear (web)](https://earweb.bttl.xyz/) and a pre-filled GitHub issue.
 
 ## Get started
 

@@ -26,6 +26,7 @@ pub enum Event {
     Connected(String, String),
     Data(Vec<u8>),
     Disconnected,
+    Unrecognized(Option<String>),
     Log(String),
     TransportExited,
     Tray(TrayIconEvent),
@@ -231,6 +232,7 @@ fn main() {
                     }
                     Event::Data(bytes) => d.receive(&bytes),
                     Event::Disconnected => d.disconnect(),
+                    Event::Unrecognized(name) => d.set_unrecognized(name),
                     Event::OutsideClick => {
                         changed = false;
                         if let Some(p) = &panel
@@ -317,6 +319,22 @@ fn main() {
                                         }
                                     }
                                     "quit" => quit = true,
+                                    "openExternal" => {
+                                        changed = false;
+                                        match args.first().and_then(Json::as_str) {
+                                            Some("earWeb") => {
+                                                platform::open_url(ui_state::EAR_WEB_URL);
+                                                p.hide();
+                                                last_hidden = now;
+                                            }
+                                            Some("reportIssue") => {
+                                                platform::open_url(&ui_state::issue_url(&d));
+                                                p.hide();
+                                                last_hidden = now;
+                                            }
+                                            _ => {}
+                                        }
+                                    }
                                     "windowBlur" => {
                                         changed = false;
                                         if p.is_open() && !p.has_focus() && now >= ignore_blur_until

@@ -25,9 +25,54 @@ function applySymbols(symbols) {
 }
 
 function renderHeader(state) {
+  const fb = state.fallback ?? { mode: 'none', deviceName: null };
   $('#panel').classList.toggle('disconnected', !state.connected);
-  $('#device-name').textContent = state.connected ? state.name : 'No Earbuds';
-  $('#device-status').textContent = state.connected ? 'Connected' : 'Not connected';
+  if (state.connected) {
+    $('#device-name').textContent = state.name;
+    $('#device-status').textContent =
+      fb.mode === 'unresponsive'
+        ? 'No response'
+        : fb.mode === 'limited'
+          ? 'Connected · Basic'
+          : 'Connected';
+  } else if (fb.mode === 'unrecognized') {
+    $('#device-name').textContent = fb.deviceName || 'Unknown Earbuds';
+    $('#device-status').textContent = 'Not recognized';
+  } else {
+    $('#device-name').textContent = 'No Earbuds';
+    $('#device-status').textContent = 'Not connected';
+  }
+}
+
+function renderFallback(fallback) {
+  const mode = fallback?.mode ?? 'none';
+  const name = fallback?.deviceName || 'These earbuds';
+  const card = $('#fallback-card');
+  const full = mode === 'unrecognized' || mode === 'unresponsive';
+  $('#panel').classList.toggle('fallback-full', full);
+  card.hidden = mode === 'none';
+  card.classList.toggle('compact', mode === 'limited');
+  if (mode === 'none') return;
+
+  const title = $('#fallback-title');
+  const copy = $('#fallback-copy');
+  const issue = $('#fallback-issue');
+  if (mode === 'unrecognized') {
+    title.textContent = `${name} isn't supported yet`;
+    copy.textContent =
+      'Use ear (web) in a Chromium browser to adjust settings, or report this model on GitHub so support can be added.';
+    issue.textContent = 'Report on GitHub';
+  } else if (mode === 'unresponsive') {
+    title.textContent = `${name} isn't responding`;
+    copy.textContent =
+      'Controls could not be read from these earbuds. Try ear (web) in a Chromium browser, or report this model on GitHub.';
+    issue.textContent = 'Report on GitHub';
+  } else if (mode === 'limited') {
+    title.textContent = `Basic support for ${name}`;
+    copy.textContent =
+      'Controls were auto-detected. Use ear (web) for extra tuning, or report this model for full support.';
+    issue.textContent = 'Request Support';
+  }
 }
 
 function renderBattery(battery) {
@@ -63,6 +108,7 @@ function renderCapabilities(capabilities) {
 
 function render(state) {
   renderHeader(state);
+  renderFallback(state.fallback);
   renderBattery(state.battery);
   renderCapabilities(state.capabilities);
   switchLock.sync(state.noisePending);
@@ -110,6 +156,8 @@ async function main() {
   });
 
   $('#quit').addEventListener('click', () => window.nx.quit());
+  $('#fallback-earweb').addEventListener('click', () => window.nx.openExternal('earWeb'));
+  $('#fallback-issue').addEventListener('click', () => window.nx.openExternal('reportIssue'));
 
   // Keep the window sized to the content as states change.
   const panel = $('#panel');

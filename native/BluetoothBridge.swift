@@ -30,6 +30,8 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
     private var stopping = false
     private var sdpRequested = Set<String>()
     private var refreshedAfterFailure = Set<String>()
+    private var failedScanCount = 0
+    private var lastUnrecognized = ""
     private var permissionManager: CBCentralManager?
 
     func start() {
@@ -53,10 +55,25 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
         delay = min(delay * 1.5, 8)
     }
 
+    private func isNothingLike(_ name: String) -> Bool {
+        let lower = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return lower.contains("nothing")
+            || lower.contains("cmf")
+            || lower.hasPrefix("ear (")
+            || lower.hasPrefix("ear(")
+            || lower.contains("buds pro")
+            || lower.contains("neckband pro")
+    }
+
+    private func reportUnrecognized(_ name: String) {
+        guard name != lastUnrecognized else { return }
+        lastUnrecognized = name
+        emit(["type": "unrecognized", "name": name])
+    }
+
     private func candidatePriority(_ device: IOBluetoothDevice) -> Int {
         if device.getServiceRecord(for: service) != nil { return 0 }
-        let lower = (device.name ?? "").lowercased()
-        if lower.contains("nothing") || lower.contains("cmf") { return 1 }
+        if isNothingLike(device.name ?? "") { return 1 }
         return 2
     }
 
@@ -107,6 +124,17 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
                 }
             }
             return
+        }
+        if let candidate = connected.first(where: {
+            isNothingLike($0.name ?? "") || $0.getServiceRecord(for: service) != nil
+        }) {
+            failedScanCount += 1
+            if failedScanCount >= 2 {
+                reportUnrecognized(candidate.name ?? "Nothing/CMF device")
+            }
+        } else {
+            failedScanCount = 0
+            reportUnrecognized("")
         }
         scheduleScan()
     }
@@ -182,6 +210,8 @@ final class BluetoothBridge: NSObject, @preconcurrency IOBluetoothRFCOMMChannelD
         }
         ready = true
         delay = 1
+        failedScanCount = 0
+        lastUnrecognized = ""
         emit(["type": "connected", "name": device.name ?? "Nothing device", "address": device.addressString ?? ""])
     }
 

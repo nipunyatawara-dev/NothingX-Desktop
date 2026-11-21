@@ -59,6 +59,14 @@ mod macos {
                             .and_then(protocol::decode_hex)
                             .map(Event::Data),
                         Some("disconnected") => Some(Event::Disconnected),
+                        Some("unrecognized") => {
+                            let name = v["name"]
+                                .as_str()
+                                .map(str::trim)
+                                .filter(|s| !s.is_empty())
+                                .map(str::to_string);
+                            Some(Event::Unrecognized(name))
+                        }
                         Some("log") => Some(Event::Log(v["message"].as_str().unwrap_or("").into())),
                         _ => None,
                     };

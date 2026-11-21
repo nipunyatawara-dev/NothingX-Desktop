@@ -119,8 +119,68 @@ hr {
   color: var(--text-secondary);
 }
 .panel:not(.disconnected) .empty,
-.panel.disconnected .connected-only { display: none; }
+.panel.disconnected .connected-only,
+.panel.fallback-full .empty,
+.panel.fallback-full .connected-only { display: none; }
 .panel.disconnected .device-badge { background: transparent; color: var(--text-secondary); }
+
+/* Unsupported / unresponsive model fallback card */
+.fallback-card {
+  margin: 4px 10px 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--chip);
+  box-shadow: inset 0 0 0 0.5px var(--separator);
+}
+.fallback-card.compact {
+  margin: 6px 10px 2px;
+  padding: 8px 10px;
+}
+.fallback-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+.fallback-copy {
+  margin: 4px 0 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.fallback-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.fallback-btn {
+  min-block-size: 28px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--segment-on);
+  color: var(--text);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  box-shadow: var(--segment-on-shadow);
+  cursor: default;
+  transition: background-color 120ms ease, filter 120ms ease, transform 100ms ease-out;
+}
+.fallback-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: none;
+}
+.fallback-btn:hover { filter: brightness(1.06); }
+.fallback-btn:active { transform: scale(0.98); }
+.fallback-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fallback-btn:active { transform: none; }
+}
 
 /* A part the earbuds didn't report (e.g. bud in a closed case). */
 .bud.unavailable { opacity: 0.35; }

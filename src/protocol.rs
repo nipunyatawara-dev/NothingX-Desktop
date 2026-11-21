@@ -1,14 +1,22 @@
 //! Nothing/CMF SPP framing. Protocol lineage: Radiance ear-web and Nothing X Mac.
-//! All production frames require a CRC. Never accept a partial frame as valid.
+//! Requests carry a whole-frame CRC-16/MODBUS. Device frames may carry a whole-frame
+//! CRC, a payload-only CRC (e.g. CMF Buds Pro 2, CMF Buds 2a), or no CRC when control
+//! bit 0x20 is clear (e.g. unsolicited CMF Buds Pro 2 events, Ear (1)). Never accept
+//! a partial or corrupted frame as valid.
 
 pub const MAX_PAYLOAD: usize = 255;
 const HEADER: usize = 8;
 const OVERHEAD: usize = 10;
+const CTRL_UNUSED: u8 = 0x80;
+const CTRL_CRC: u8 = 0x20;
+const CTRL_STATUS_MASK: u8 = 0x1f;
+const MAX_NO_CRC_STATUS: u8 = 12;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Frame {
     pub command: u16,
     pub operation: u8,
+    pub status: u8,
     pub payload: Vec<u8>,
 }
 
@@ -72,23 +80,40 @@ impl Parser {
                 if self.buffer.len() < HEADER {
                     break;
                 }
-                if self.buffer[1] != 0x60 || self.buffer[2] != 0x01 || self.buffer[6] != 0x00 {
+                let control_lo = self.buffer[1];
+                let control_hi = self.buffer[2];
+                let cmd_hi = self.buffer[4];
+                let has_crc = control_lo & CTRL_CRC != 0;
+                let status = control_lo & CTRL_STATUS_MASK;
+                if control_lo & CTRL_UNUSED != 0 || control_hi != 0x01 || self.buffer[6] != 0x00 {
                     self.buffer.remove(0);
                     continue;
                 }
-                let length = OVERHEAD + usize::from(self.buffer[5]);
+                if !has_crc
+                    && (status > MAX_NO_CRC_STATUS || !matches!(cmd_hi, 0x40 | 0x60 | 0x70 | 0xe0))
+                {
+                    self.buffer.remove(0);
+                    continue;
+                }
+                let payload_len = usize::from(self.buffer[5]);
+                let body = HEADER + payload_len;
+                let length = payload_len + if has_crc { OVERHEAD } else { HEADER };
                 if self.buffer.len() < length {
                     break;
                 }
-                let body = length - 2;
-                let expected = u16::from_le_bytes([self.buffer[body], self.buffer[body + 1]]);
-                if crc16(&self.buffer[..body]) != expected {
-                    self.buffer.remove(0);
-                    continue;
+                if has_crc {
+                    let expected = u16::from_le_bytes([self.buffer[body], self.buffer[body + 1]]);
+                    let valid = crc16(&self.buffer[..body]) == expected
+                        || crc16(&self.buffer[HEADER..body]) == expected;
+                    if !valid {
+                        self.buffer.remove(0);
+                        continue;
+                    }
                 }
                 frames.push(Frame {
-                    command: u16::from_le_bytes([self.buffer[3], self.buffer[4]]),
+                    command: u16::from_le_bytes([self.buffer[3], cmd_hi]),
                     operation: self.buffer[7],
+                    status,
                     payload: self.buffer[HEADER..body].to_vec(),
                 });
                 self.buffer.drain(..length);
@@ -152,6 +177,7 @@ mod tests {
                 vec![Frame {
                     command: 0x4007,
                     operation: 7,
+                    status: 0,
                     payload: vec![3, 2, 87, 3, 0xd0, 4, 42]
                 }]
             );
@@ -181,6 +207,7 @@ mod tests {
             vec![Frame {
                 command: 0x4007,
                 operation: 1,
+                status: 0,
                 payload: vec![1, 2, 80],
             }]
         );
@@ -191,5 +218,64 @@ mod tests {
         assert!(decode_hex("xx").is_none());
         assert!(decode_hex("0").is_none());
         assert!(decode_hex("é").is_none());
+    }
+    #[test]
+    fn payload_only_crc_frames_parse_and_reject_corruption() {
+        // Real captures: CMF Buds Pro 2 / Buds 2a checksum only the payload.
+        let battery = decode_hex("556001074005000202025f035f2ca2").unwrap();
+        let firmware = decode_hex("5560014240080001312e302e312e3630d866").unwrap();
+        let empty_ack = decode_hex("5560010f70000001ffff").unwrap();
+
+        for split in 0..battery.len() {
+            let mut parser = Parser::default();
+            assert!(parser.push(&battery[..split]).is_empty());
+            let frames = parser.push(&battery[split..]);
+            assert_eq!(frames.len(), 1);
+            assert_eq!(frames[0].command, 0x4007);
+            assert_eq!(frames[0].operation, 2);
+            assert_eq!(frames[0].payload, vec![2, 2, 0x5f, 3, 0x5f]);
+        }
+
+        let mut parser = Parser::default();
+        let mut combined = firmware;
+        combined.extend(&empty_ack);
+        let frames = parser.push(&combined);
+        assert_eq!(frames.len(), 2);
+        assert_eq!(frames[0].command, 0x4042);
+        assert_eq!(frames[0].payload, b"1.0.1.60");
+        assert_eq!(frames[1].command, 0x700f);
+        assert!(frames[1].payload.is_empty());
+
+        let mut corrupt = battery;
+        *corrupt.last_mut().unwrap() ^= 0xff;
+        assert!(Parser::default().push(&corrupt).is_empty());
+    }
+    #[test]
+    fn non_multiframe_and_no_crc_device_frames_parse() {
+        // Reply with control 0x0120 (CRC set, multi-frame clear).
+        let reply_0120 = decode_hex("5520011e4006000301070002040011ba").unwrap();
+        let frames = Parser::default().push(&reply_0120);
+        assert_eq!(frames.len(), 1);
+        assert_eq!(frames[0].command, 0x401e);
+        assert_eq!(frames[0].payload, vec![1, 7, 0, 2, 4, 0]);
+
+        // CMF Buds Pro 2 unsolicited ANC events carry control 0x0100 (no CRC).
+        let event_3b = decode_hex("55000103e0030000010500").unwrap();
+        let event_2b = decode_hex("55000103e00200000107").unwrap();
+        let mut stream = event_3b;
+        stream.extend(event_2b);
+        let frames = Parser::default().push(&stream);
+        assert_eq!(frames.len(), 2);
+        assert_eq!(frames[0].command, 0xe003);
+        assert_eq!(frames[0].payload, vec![1, 5, 0]);
+        assert_eq!(frames[1].command, 0xe003);
+        assert_eq!(frames[1].payload, vec![1, 7]);
+
+        // Ear (1) reply without CRC (control 0x0140).
+        let ear1 = decode_hex("5540010740030000010255").unwrap();
+        let frames = Parser::default().push(&ear1);
+        assert_eq!(frames.len(), 1);
+        assert_eq!(frames[0].command, 0x4007);
+        assert_eq!(frames[0].payload, vec![1, 2, 0x55]);
     }
 }

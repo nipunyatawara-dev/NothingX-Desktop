@@ -41,6 +41,22 @@ pub fn single_instance() -> io::Result<fs::File> {
     Ok(file)
 }
 
+pub fn open_url(url: &str) {
+    if !url.starts_with("https://") || url.bytes().any(|b| b.is_ascii_control() || b == b' ') {
+        return;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("/usr/bin/open").arg(url).spawn();
+    }
+    #[cfg(windows)]
+    {
+        let _ = std::process::Command::new("rundll32")
+            .args(["url.dll,FileProtocolHandler", url])
+            .spawn();
+    }
+}
+
 pub fn notify_running_instance() {
     #[cfg(windows)]
     {

@@ -114,8 +114,9 @@ window.createEqualizer = function createEqualizer({ api, views, symbols }) {
   function render(next) {
     state = next;
     const eqCaps = next.capabilities.eq;
-    button.disabled = !next.connected || eqCaps.presets.length === 0;
-    if (!next.connected) {
+    const unresponsive = next.fallback?.mode === 'unresponsive';
+    button.disabled = !next.connected || unresponsive || eqCaps.presets.length === 0;
+    if (!next.connected || unresponsive) {
       if (views.isOpen('view-eq')) views.back();
       return;
     }

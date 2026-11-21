@@ -68,8 +68,9 @@ window.createQuickSettings = function createQuickSettings({ api, views }) {
 
   function render(next) {
     state = next;
-    gear.disabled = !next.connected;
-    if (!next.connected) {
+    const unresponsive = next.fallback?.mode === 'unresponsive';
+    gear.disabled = !next.connected || unresponsive;
+    if (!next.connected || unresponsive) {
       if (views.isOpen('view-settings')) views.back();
       return;
     }
