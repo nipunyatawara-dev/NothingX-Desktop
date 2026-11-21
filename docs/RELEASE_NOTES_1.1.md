@@ -5,7 +5,7 @@ Download the macOS DMG below to get CMF Buds Pro 2 support, automatic feature de
 ## Platform status
 
 - macOS (Apple Silicon and Intel): ready now (`NothingX-Desktop-1.1.0-macos-arm64.dmg` and `NothingX-Desktop-1.1.0-macos-intel.dmg`).
-- Windows: v1.1 is currently in development and will be uploaded once Windows testing is complete.
+- Windows: we are currently developing the Windows update and will list it here in a few days.
 
 Built locally without GitHub Actions. Source archive and `SHA256SUMS-macos.txt` are attached.
 

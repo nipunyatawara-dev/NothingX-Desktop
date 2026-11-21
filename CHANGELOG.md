@@ -6,7 +6,7 @@ All notable changes to NothingX Desktop live here.
 
 **Platform status**
 - macOS: Apple Silicon and Intel DMGs are built and ready.
-- Windows: v1.1 is currently in development and will be added after Windows testing finishes.
+- Windows: we are currently developing the Windows update and will list it in a few days.
 
 **What changed**
 1. Fixed CMF Buds Pro 2 and payload-only CRC models. The packet parser accepts whole-frame CRC, payload-only CRC, no-CRC unsolicited events, and status codes (triggering one-shot activation on status `2`), and decoders handle reversed ANC triples, multi-pair in-ear responses, and call-control (`button 9`) gesture filtering.
