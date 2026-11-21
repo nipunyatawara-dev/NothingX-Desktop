@@ -55,6 +55,7 @@ The command removes the quarantine flag from the installed app bundle.
 - **Your everyday settings.** In-ear detection, low latency, spatial audio, dual connection and gesture mappings, where supported.
 - **A compact, familiar panel.** Blurred translucent material on macOS, sharp icons, light/dark appearance and a menu-bar mark that preserves its red accent.
 - **A smaller desktop companion.** Rust handles device state and Bluetooth, while the operating system supplies the webview. No bundled Chromium runtime.
+- **Built-in update checks.** Checks GitHub Releases on launch and when clicking `NothingX Desktop` at the bottom of the panel. When a new version matches your platform, the footer turns blue (`There is an update`) and installs after verifying the SHA-256 checksum.
 
 Available controls depend on the headphone model and firmware. Missing battery
 readings stay unknown rather than showing a misleading zero.

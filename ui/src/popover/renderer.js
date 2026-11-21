@@ -106,9 +106,48 @@ function renderCapabilities(capabilities) {
   $('.option[data-mode="transparency"]').hidden = !capabilities.transparency;
 }
 
+function renderUpdate(update) {
+  const el = $('#app-name');
+  const status = update?.status ?? 'idle';
+  const available = status === 'available';
+  const busy = ['checking', 'downloading', 'verifying', 'installing'].includes(status);
+  el.classList.toggle('update-available', available);
+  el.classList.toggle('update-busy', busy);
+  el.disabled = busy;
+  if (available) {
+    el.textContent = 'There is an update';
+    el.title = update.version ? `Click to install v${update.version}` : 'Click to install update';
+  } else if (status === 'checking') {
+    el.textContent = 'Checking for updates…';
+    el.title = '';
+  } else if (status === 'downloading') {
+    el.textContent = 'Downloading update…';
+    el.title = '';
+  } else if (status === 'verifying') {
+    el.textContent = 'Verifying update…';
+    el.title = '';
+  } else if (status === 'installing') {
+    el.textContent = 'Installing update…';
+    el.title = '';
+  } else if (status === 'upToDate') {
+    el.textContent = 'Up to date';
+    el.title = '';
+  } else if (status === 'opened') {
+    el.textContent = update?.message || 'Opened update DMG';
+    el.title = '';
+  } else if (status === 'error') {
+    el.textContent = update?.message || 'Update check failed';
+    el.title = '';
+  } else {
+    el.textContent = 'NothingX Desktop';
+    el.title = 'Click to check for updates';
+  }
+}
+
 function render(state) {
   renderHeader(state);
   renderFallback(state.fallback);
+  renderUpdate(state.update);
   renderBattery(state.battery);
   renderCapabilities(state.capabilities);
   switchLock.sync(state.noisePending);
@@ -156,6 +195,7 @@ async function main() {
   });
 
   $('#quit').addEventListener('click', () => window.nx.quit());
+  $('#app-name').addEventListener('click', () => window.nx.updateAction());
   $('#fallback-earweb').addEventListener('click', () => window.nx.openExternal('earWeb'));
   $('#fallback-issue').addEventListener('click', () => window.nx.openExternal('reportIssue'));
 

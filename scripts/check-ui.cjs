@@ -88,4 +88,28 @@ assert.equal(document.querySelector('#panel').classList.contains('fallback-full'
 assert.equal(document.querySelector('#fallback-card').classList.contains('compact'), true);
 assert.equal(document.querySelector('#device-status').textContent, 'Connected · Basic');
 
-console.log('Battery, model-dependent controls, and fallback modes passed.');
+// Footer update button states: idle, checking, available (blue), downloading, upToDate, error.
+const footer = document.querySelector('#app-name');
+context.renderUpdate({ status: 'idle', version: null, message: null });
+assert.equal(footer.textContent, 'NothingX Desktop');
+assert.equal(footer.classList.contains('update-available'), false);
+assert.equal(footer.disabled, false);
+
+context.renderUpdate({ status: 'checking', version: null, message: null });
+assert.equal(footer.textContent, 'Checking for updates…');
+assert.equal(footer.disabled, true);
+
+context.renderUpdate({ status: 'available', version: '1.2', message: null });
+assert.equal(footer.textContent, 'There is an update');
+assert.equal(footer.classList.contains('update-available'), true);
+assert.equal(footer.disabled, false);
+
+context.renderUpdate({ status: 'downloading', version: '1.2', message: null });
+assert.equal(footer.textContent, 'Downloading update…');
+assert.equal(footer.disabled, true);
+
+context.renderUpdate({ status: 'upToDate', version: null, message: null });
+assert.equal(footer.textContent, 'Up to date');
+assert.equal(footer.classList.contains('update-available'), false);
+
+console.log('Battery, model-dependent controls, fallback modes, and update footer passed.');

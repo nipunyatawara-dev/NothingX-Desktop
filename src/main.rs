@@ -6,6 +6,7 @@ mod transport;
 use nothingx_desktop::{
     device::{Action, Device},
     ui_state,
+    updater::{self, InstallOutcome, ReleaseInfo, UpdateStatus},
 };
 use serde_json::{Value as Json, json};
 use std::{
@@ -14,7 +15,7 @@ use std::{
 };
 use tao::{
     event::{Event as TaoEvent, StartCause, WindowEvent},
-    event_loop::{ControlFlow, EventLoopBuilder},
+    event_loop::{ControlFlow, EventLoopBuilder, EventLoopProxy},
 };
 use tray_icon::{
     MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent,
@@ -27,12 +28,56 @@ pub enum Event {
     Data(Vec<u8>),
     Disconnected,
     Unrecognized(Option<String>),
+    UpdateStatus(UpdateStatus),
+    UpdateRestart,
     Log(String),
     TransportExited,
     Tray(TrayIconEvent),
     Ipc(String),
     OutsideClick,
     Reopen,
+}
+
+fn spawn_update_check(proxy: EventLoopProxy<Event>, manual: bool) {
+    std::thread::spawn(move || {
+        let next = match updater::check_latest() {
+            Ok(Some(release)) => UpdateStatus::Available(release),
+            Ok(None) => {
+                if manual {
+                    UpdateStatus::UpToDate
+                } else {
+                    UpdateStatus::Idle
+                }
+            }
+            Err(message) => UpdateStatus::Error { message, manual },
+        };
+        let _ = proxy.send_event(Event::UpdateStatus(next));
+    });
+}
+
+fn spawn_update_install(proxy: EventLoopProxy<Event>, release: ReleaseInfo) {
+    let data_dir = platform::data_dir();
+    std::thread::spawn(move || {
+        let progress_proxy = proxy.clone();
+        match updater::download_and_install(&release, &data_dir, move |status| {
+            let _ = progress_proxy.send_event(Event::UpdateStatus(status));
+        }) {
+            Ok(InstallOutcome::RestartNow) => {
+                let _ = proxy.send_event(Event::UpdateRestart);
+            }
+            Ok(InstallOutcome::OpenedManually) => {
+                let _ = proxy.send_event(Event::UpdateStatus(UpdateStatus::OpenedInstaller {
+                    version: release.version,
+                }));
+            }
+            Err(message) => {
+                let _ = proxy.send_event(Event::UpdateStatus(UpdateStatus::Error {
+                    message,
+                    manual: true,
+                }));
+            }
+        }
+    });
 }
 
 fn reopen(
@@ -143,6 +188,9 @@ fn main() {
         let _ = tray_proxy.send_event(Event::Tray(e));
     }));
     let mut d = Device::default();
+    let mut update_status = UpdateStatus::Idle;
+    let mut startup_update_check: Option<Instant> = None;
+    let mut update_notice_until: Option<Instant> = None;
     let mut tray = None;
     let mut panel: Option<panel::Panel> = None;
     let mut bluetooth: Option<transport::Transport> = None;
@@ -173,6 +221,9 @@ fn main() {
                     panel::update_tray_icon(tray, &p.window);
                 }
                 changed = true;
+                if quit_at.is_none() {
+                    startup_update_check = Some(now + Duration::from_secs(2));
+                }
                 match transport::Transport::start(proxy.clone()) {
                     Ok(t) => bluetooth = Some(t),
                     Err(e) => {
@@ -233,6 +284,18 @@ fn main() {
                     Event::Data(bytes) => d.receive(&bytes),
                     Event::Disconnected => d.disconnect(),
                     Event::Unrecognized(name) => d.set_unrecognized(name),
+                    Event::UpdateStatus(next) => {
+                        update_notice_until = match &next {
+                            UpdateStatus::UpToDate
+                            | UpdateStatus::OpenedInstaller { .. }
+                            | UpdateStatus::Error { manual: true, .. } => {
+                                Some(now + Duration::from_millis(3500))
+                            }
+                            _ => None,
+                        };
+                        update_status = next;
+                    }
+                    Event::UpdateRestart => quit = true,
                     Event::OutsideClick => {
                         changed = false;
                         if let Some(p) = &panel
@@ -298,7 +361,8 @@ fn main() {
                             if let Some(p) = &panel {
                                 match command {
                                     "init" => {
-                                        let mut init = ui_state::init(&d);
+                                        let mut init =
+                                            ui_state::init_with_update(&d, &update_status);
                                         init["accent"] = json!(panel::accent());
                                         p.reply(id, &init);
                                         ready = true;
@@ -319,6 +383,24 @@ fn main() {
                                         }
                                     }
                                     "quit" => quit = true,
+                                    "updateAction" => {
+                                        if let Some(release) =
+                                            update_status.available_release().cloned()
+                                        {
+                                            update_notice_until = None;
+                                            update_status = UpdateStatus::Downloading {
+                                                version: release.version.clone(),
+                                            };
+                                            spawn_update_install(proxy.clone(), release);
+                                        } else if !update_status.is_busy() {
+                                            startup_update_check = None;
+                                            update_notice_until = None;
+                                            update_status = UpdateStatus::Checking { manual: true };
+                                            spawn_update_check(proxy.clone(), true);
+                                        } else {
+                                            changed = false;
+                                        }
+                                    }
                                     "openExternal" => {
                                         changed = false;
                                         match args.first().and_then(Json::as_str) {
@@ -427,6 +509,25 @@ fn main() {
                 }
             }
         }
+        if startup_update_check.is_some_and(|at| now >= at) {
+            startup_update_check = None;
+            if matches!(update_status, UpdateStatus::Idle) {
+                update_status = UpdateStatus::Checking { manual: false };
+                spawn_update_check(proxy.clone(), false);
+            }
+        }
+        if update_notice_until.is_some_and(|at| now >= at) {
+            update_notice_until = None;
+            if matches!(
+                update_status,
+                UpdateStatus::UpToDate
+                    | UpdateStatus::OpenedInstaller { .. }
+                    | UpdateStatus::Error { .. }
+            ) {
+                update_status = UpdateStatus::Idle;
+                changed = true;
+            }
+        }
         let due = d.deadline().is_some_and(|at| now >= at);
         changed |= due;
         for bytes in d.tick(now) {
@@ -438,7 +539,7 @@ fn main() {
         }
         let mut status_dirty = false;
         if changed {
-            let state = ui_state::snapshot(&d);
+            let state = ui_state::snapshot_with_update(&d, &update_status);
             if state != signature {
                 signature = state;
                 status_dirty = true;
@@ -467,7 +568,12 @@ fn main() {
         }
         if status_dirty && let Some(path) = &status_path {
             if signature.is_null() {
-                write_status(path, &ui_state::snapshot(&d), &d, visibility);
+                write_status(
+                    path,
+                    &ui_state::snapshot_with_update(&d, &update_status),
+                    &d,
+                    visibility,
+                );
             } else {
                 write_status(path, &signature, &d, visibility);
             }
@@ -476,6 +582,8 @@ fn main() {
             .deadline()
             .into_iter()
             .chain(restart)
+            .chain(startup_update_check)
+            .chain(update_notice_until)
             .chain(quit_at)
             .chain(panel.as_ref().and_then(|p| p.deadline()))
             .min()

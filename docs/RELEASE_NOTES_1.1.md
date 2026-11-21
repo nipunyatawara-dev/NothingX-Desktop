@@ -11,11 +11,11 @@ Built locally without GitHub Actions. Source archive and `SHA256SUMS-macos.txt` 
 
 ## What changed in 1.1
 
-1. Fixed CMF Buds Pro 2 replies and other payload-only CRC models. The parser now accepts whole-frame CRC, payload-only CRC, no-CRC unsolicited events, and error status codes (sending `0xF001` once if a device reports not activated).
-2. Fixed ANC triple ordering, multi-pair in-ear replies, and call-control gesture filtering so CMF Buds Pro 2 battery, noise control, Ultra Bass, EQ, quick settings, and gestures all load and confirm properly.
-3. Added automatic runtime feature probing for unlisted Nothing and CMF models, plus stricter model matching so newer models do not fall back to older profiles.
-4. Added automatic capability pruning when a headset replies with `status 3` (not supported), removing dead toggles from Quick Settings.
-5. Added a fallback card inside the popover for unrecognized or unresponsive Nothing and CMF devices, with buttons to open `ear (web)` (`https://earweb.bttl.xyz/`) in a Chromium browser or open a pre-filled GitHub issue with the detected model name. The card stays hidden when nothing is connected or when a known headset works normally.
+1. Fixed CMF Buds Pro 2 and other payload-only CRC models. The parser accepts whole-frame CRC, payload-only CRC, no-CRC unsolicited events, and status codes (sending `0xF001` once if a device reports not activated), and decoders handle reversed ANC triples, multi-pair in-ear replies, and call-control gesture filtering.
+2. Added automatic runtime feature probing for unlisted Nothing and CMF models, plus stricter model matching so newer models do not fall back to older profiles.
+3. Added automatic capability pruning when a headset replies with `status 3` (not supported), removing dead toggles from Quick Settings.
+4. Added a fallback card inside the popover for unrecognized or unresponsive Nothing and CMF devices, with buttons to open `ear (web)` (`https://earweb.bttl.xyz/`) in a Chromium browser or open a pre-filled GitHub issue with the detected model name. The card stays hidden when nothing is connected or when a known headset works normally.
+5. Added automatic update checks and in-app updates. Click `NothingX Desktop` at the bottom of the panel to check manually; the app also checks once on startup. When a matching update is available, the footer turns blue (`There is an update`) and clicking it downloads, verifies the SHA-256 checksum and macOS signature, installs, and relaunches.
 
 ## Install on macOS
 

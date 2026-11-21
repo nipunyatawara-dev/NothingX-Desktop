@@ -1,5 +1,8 @@
 //! Compatibility adapter for the original, unmodified Nothing X Mac renderer.
-use crate::device::{Device, Fallback, Key, Value};
+use crate::{
+    device::{Device, Fallback, Key, Value},
+    updater::UpdateStatus,
+};
 use serde_json::{Value as Json, json};
 use std::sync::OnceLock;
 
@@ -26,6 +29,45 @@ pub fn mac(address: [u8; 6]) -> String {
         .join("-")
 }
 pub fn snapshot(d: &Device) -> Json {
+    snapshot_with_update(d, &UpdateStatus::Idle)
+}
+
+pub fn update_json(update: &UpdateStatus) -> Json {
+    match update {
+        UpdateStatus::Idle => json!({"status": "idle", "version": null, "message": null}),
+        UpdateStatus::Checking { manual: true } => {
+            json!({"status": "checking", "version": null, "message": null})
+        }
+        UpdateStatus::Checking { manual: false } => {
+            json!({"status": "idle", "version": null, "message": null})
+        }
+        UpdateStatus::UpToDate => json!({"status": "upToDate", "version": null, "message": null}),
+        UpdateStatus::Available(info) => {
+            json!({"status": "available", "version": info.version, "message": null})
+        }
+        UpdateStatus::Downloading { version } => {
+            json!({"status": "downloading", "version": version, "message": null})
+        }
+        UpdateStatus::Verifying { version } => {
+            json!({"status": "verifying", "version": version, "message": null})
+        }
+        UpdateStatus::Installing { version } => {
+            json!({"status": "installing", "version": version, "message": null})
+        }
+        UpdateStatus::OpenedInstaller { version } => {
+            json!({"status": "opened", "version": version, "message": "Opened DMG to install"})
+        }
+        UpdateStatus::Error {
+            message,
+            manual: true,
+        } => json!({"status": "error", "version": null, "message": message}),
+        UpdateStatus::Error { manual: false, .. } => {
+            json!({"status": "idle", "version": null, "message": null})
+        }
+    }
+}
+
+pub fn snapshot_with_update(d: &Device, update: &UpdateStatus) -> Json {
     let mut caps = match &d.caps {
         Some(c) => {
             let mut caps = serde_json::to_value(c).unwrap_or(Json::Null);
@@ -144,7 +186,7 @@ pub fn snapshot(d: &Device) -> Json {
             "firmware":if d.firmware.is_empty(){None}else{Some(d.firmware.as_str())},"ringing":d.ringing.map(|s|match s{2=>"left",3=>"right",_=>"all"})},
         "eq":{"preset":byte(d,Key::Preset),"pending":d.is_pending(Key::Preset),"custom":custom},
         "dual":{"enabled":flag(d,Key::Dual),"pending":d.is_pending(Key::Dual),"devices":d.devices.iter().map(|dev|json!({"mac":mac(dev.address),"name":dev.name,"isSelf":dev.is_self,"isConnected":dev.connected})).collect::<Vec<_>>(),"busyMac":d.dual_busy.map(|(a,_)|mac(a)),"maxConnected":2},
-        "gestures":gestures,"capabilities":caps,"fallback":fallback})
+        "gestures":gestures,"capabilities":caps,"fallback":fallback,"update":update_json(update)})
 }
 
 pub fn issue_url(d: &Device) -> String {
@@ -356,9 +398,12 @@ pub fn appearance() -> Json {
         .clone()
 }
 pub fn init(d: &Device) -> Json {
+    init_with_update(d, &UpdateStatus::Idle)
+}
+pub fn init_with_update(d: &Device, update: &UpdateStatus) -> Json {
     let mut a = appearance();
     a["appName"] = json!("NothingX Desktop");
-    a["device"] = snapshot(d);
+    a["device"] = snapshot_with_update(d, update);
     a
 }
 

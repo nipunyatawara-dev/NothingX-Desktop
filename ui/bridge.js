@@ -21,6 +21,7 @@
     onDeviceState: listener => listeners.state.add(listener),
     quit: () => send('quit'),
     openExternal: target => send('openExternal', [target]),
+    updateAction: () => send('updateAction'),
     popupMenu: (items, x, y) => send('popupMenu', [items, x, y], true),
   };
   for (const command of ['setNoiseMode', 'setAncStrength', 'setBass', 'setQuickToggle', 'ring', 'setSpatialAudio', 'setDualConnection', 'setDualDevice', 'setGesture', 'setGestureNoiseCycle', 'setEqPreset', 'setCustomEq']) {
